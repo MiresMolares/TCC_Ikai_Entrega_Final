@@ -46,6 +46,16 @@ void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   group('ApiClient', () {
+    test('"origem" usa o endereço da própria página (site hospedado)', () {
+      expect(
+        ApiClient.resolverEndereco('origem', origemDaPagina: 'https://ikai.onrender.com'),
+        'https://ikai.onrender.com',
+      );
+      expect(ApiClient.resolverEndereco('http://srv:3000'), 'http://srv:3000');
+      // Fora da web (testes, celular) não há página: fica sem servidor.
+      expect(ApiClient.resolverEndereco('origem'), '');
+    });
+
     test('sem endereço fica inativo e não chama a rede', () async {
       final f = Falso();
       final api = ApiClient(baseUrl: '', enviar: f.enviar);

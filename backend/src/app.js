@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -14,7 +16,10 @@ import { rotasPerfil } from './rotas/perfil.js';
 export function criarApp({ db, config }) {
   const app = express();
   app.disable('x-powered-by');
-  app.use(helmet());
+  if (config.confiarProxy) app.set('trust proxy', 1);
+  // O app Flutter na web precisa rodar WebAssembly e baixar fontes e o
+  // motor gráfico do Google: a política de conteúdo padrão do helmet bloqueia.
+  app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
   app.use(cors({ origin: config.corsOrigem === '*' ? true : config.corsOrigem.split(',') }));
   // 64 KB para tudo, exceto criar ou editar artigo (pode trazer a capa) e
   // trocar a foto de perfil.
@@ -29,6 +34,20 @@ export function criarApp({ db, config }) {
   app.get('/saude', (_req, res) => {
     res.json({ ok: true });
   });
+
+  // O site (app Flutter compilado), se existir: mesmo endereço da API, então
+  // não há CORS nem endereço de servidor para configurar no app.
+  const site = config.pastaSite;
+  if (site && existsSync(join(site, 'index.html'))) {
+    app.use(express.static(site, {
+      setHeaders: (res, caminho) => {
+        // Páginas e o "service worker" sempre conferem se há versão nova;
+        // o resto (scripts, imagens) pode ficar em cache por um dia.
+        const sempreNovo = /(index\.html|flutter_service_worker\.js|flutter_bootstrap\.js|version\.json|manifest\.json)$/.test(caminho);
+        res.set('Cache-Control', sempreNovo ? 'no-cache' : 'public, max-age=86400');
+      },
+    }));
+  }
 
   app.use(rotasAuth({ db, config }));
   app.use(rotasConteudo({ db, config }));

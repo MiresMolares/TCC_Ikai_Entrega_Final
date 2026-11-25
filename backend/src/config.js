@@ -1,4 +1,9 @@
 // Configuração lida das variáveis de ambiente (veja .env.example).
+import { fileURLToPath } from 'node:url';
+
+/** Onde fica o site (o app Flutter compilado para a web). */
+const SITE_PADRAO = fileURLToPath(new URL('../public', import.meta.url));
+
 export function lerConfig(env = process.env) {
   return {
     porta: Number(env.PORT || 3000),
@@ -9,6 +14,13 @@ export function lerConfig(env = process.env) {
     corsOrigem: env.CORS_ORIGEM || '*',
     bcryptCusto: Number(env.BCRYPT_CUSTO || 10),
     limitarLogin: env.LIMITAR_LOGIN !== 'nao',
+    // Pasta do site. Se existir (com index.html), o servidor entrega o app
+    // no mesmo endereço da API. Vazio desliga.
+    pastaSite: env.SITE_DIR ?? SITE_PADRAO,
+    // Atrás de um proxy (Render, por exemplo), o IP real vem no cabeçalho
+    // X-Forwarded-For. Sem isto, o limite de tentativas de login valeria
+    // para todo mundo junto.
+    confiarProxy: env.TRUST_PROXY === 'sim',
   };
 }
 

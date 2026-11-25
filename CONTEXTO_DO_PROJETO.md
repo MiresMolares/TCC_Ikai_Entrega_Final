@@ -69,7 +69,7 @@ progresso, login pela API, servidor Node+Express+MongoDB em `backend/`) +
 da linha da equipe: `docs/` (relatório, diagramas, Swagger) e 9 conteúdos de
 estudo viraram artigos.
 
-**Rodada de 24/11 (ainda sem commit; detalhes em README_ENTREGA.md):**
+**Rodada de 24/11 (commit `3582da2`; detalhes em README_ENTREGA.md):**
 - Ik AI **removida** do app e do servidor (chat, Gemini, combinados, botão,
   etapa do fluxo, textos). O fim do dia virou uma tela simples
   (`lib/pages_configurar/tela_fim_do_dia.dart`).
@@ -135,7 +135,12 @@ Caio (objetivo "Passar o tempo" → Explorar → buscar pelo título).
 
 ## 7. Pendências e cuidados
 
-- Commitar e enviar ao GitHub a rodada de 24/11 (confirmar antes).
+- A rodada de 24/11 já está no GitHub (commit `3582da2`, branch `main`).
+- **Hospedagem (preparada, falta publicar):** só site, sem APK. Um serviço no
+  Render entrega a API e o site juntos (`render.yaml`; o site compilado fica
+  em `backend/public`, gerado por `.\gerar-site.ps1` com `API_URL=origem`).
+  Passo a passo para criar a conta e publicar em `HOSPEDAGEM.md`. Sempre que
+  mudar `lib\`, rodar `.\gerar-site.ps1` antes de enviar ao GitHub.
 - Não existe: login persistente (recarregar pede login), atualização em tempo
   real, edição de comunidade, recuperação de senha real, login com Google.
 - `docs/api/openapi.yaml` (da equipe) ainda descreve login com

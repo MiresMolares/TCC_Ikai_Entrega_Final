@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "url": "assets/AssetManifest.1434cbb1.bin",
+      "hash": "1434cbb1",
+      "size": 334,
+      "urlHashed": true
+    },
+    {
+      "url": "assets/AssetManifest.bin.543f7502.json",
+      "hash": "543f7502",
+      "size": 450,
+      "urlHashed": true
+    },
+    {
+      "url": "assets/FontManifest.6b5a4ca7.json",
+      "hash": "6b5a4ca7",
+      "size": 226,
+      "urlHashed": true
+    },
+    {
+      "url": "assets/NOTICES.7675bd74",
+      "hash": "7675bd74",
+      "size": 1397812,
+      "urlHashed": true
+    },
+    {
+      "url": "assets/assets/Temporario_foto_perfil.55e7dd0b.png",
+      "hash": "55e7dd0b",
+      "size": 342972,
+      "urlHashed": true
+    },
+    {
+      "url": "assets/assets/ikai.4640e59e.png",
+      "hash": "4640e59e",
+      "size": 47523,
+      "urlHashed": true
+    },
+    {
+      "url": "assets/assets/logo_nome.9616d7c0.png",
+      "hash": "9616d7c0",
+      "size": 37726,
+      "urlHashed": true
+    },
+    {
+      "url": "assets/fonts/MaterialIcons-Regular.b5b88afb.otf",
+      "hash": "b5b88afb",
+      "size": 17380,
+      "urlHashed": true
+    },
+    {
+      "url": "assets/packages/cupertino_icons/assets/CupertinoIcons.9d8d1c5e.ttf",
+      "hash": "9d8d1c5e",
+      "size": 844,
+      "urlHashed": true
+    },
+    {
+      "url": "assets/shaders/ink_sparkle.2dca5ab9.frag",
+      "hash": "2dca5ab9",
+      "size": 8890,
+      "urlHashed": true
+    },
+    {
+      "url": "assets/shaders/stretch_effect.ab412f07.frag",
+      "hash": "ab412f07",
+      "size": 6737,
+      "urlHashed": true
+    },
+    {
+      "url": "favicon.png",
+      "hash": "7ab2525f",
+      "size": 917,
+      "urlHashed": false
+    },
+    {
+      "url": "flutter.js",
+      "hash": "d2e7708f",
+      "size": 13169,
+      "urlHashed": false
+    },
+    {
+      "url": "flutter_bootstrap.js",
+      "hash": "7e26b400",
+      "size": 14581,
+      "urlHashed": false
+    },
+    {
+      "url": "icons/Icon-192.png",
+      "hash": "3dce9907",
+      "size": 5292,
+      "urlHashed": false
+    },
+    {
+      "url": "icons/Icon-512.png",
+      "hash": "baccb205",
+      "size": 8252,
+      "urlHashed": false
+    },
+    {
+      "url": "icons/Icon-maskable-192.png",
+      "hash": "d2c842e2",
+      "size": 5594,
+      "urlHashed": false
+    },
+    {
+      "url": "icons/Icon-maskable-512.png",
+      "hash": "6aee06cd",
+      "size": 20998,
+      "urlHashed": false
+    },
+    {
+      "url": "index.html",
+      "hash": "efc3a926",
+      "size": 1189,
+      "urlHashed": false
+    },
+    {
+      "url": "main.dart.cb1f68a4.js",
+      "hash": "cb1f68a4",
+      "size": 3446854,
+      "urlHashed": true
+    },
+    {
+      "url": "manifest.json",
+      "hash": "916c13b8",
+      "size": 904,
+      "urlHashed": false
+    },
+    {
+      "url": "version.json",
+      "hash": "276deb9c",
+      "size": 78,
+      "urlHashed": false
+    }
+  ]
+}

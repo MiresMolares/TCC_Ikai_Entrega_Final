@@ -1,0 +1,31 @@
+# Hospedagem do Ikai no Render (render.com), plano gratuito.
+# Um só serviço: o servidor Node entrega a API e o site (backend/public).
+# Passo a passo em HOSPEDAGEM.md.
+services:
+  - type: web
+    name: ikai
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: node src/server.js
+    healthCheckPath: /saude
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      # A conexão com o MongoDB Atlas (tem a senha do banco): o Render pede
+      # na hora de criar. Nunca escreva aqui.
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB
+        value: ikai_app
+      # O Render gera um segredo aleatório sozinho.
+      - key: JWT_SECRET
+        generateValue: true
+      # O Render fica na frente do servidor (proxy): o IP real vem no
+      # cabeçalho, e o limite de tentativas de login vale por pessoa.
+      - key: TRUST_PROXY
+        value: sim
+      - key: CORS_ORIGEM
+        value: "*"

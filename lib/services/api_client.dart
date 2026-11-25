@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:http/http.dart' as http;
 
 /// Resposta crua da API.
@@ -62,15 +63,26 @@ Future<RespostaApi> _enviarPadrao(
 ///   flutter run -d chrome --dart-define-from-file=env.json
 /// com `"API_URL": "http://localhost:3000"` no env.json. Sem API_URL o app
 /// funciona como antes: contas de teste e dados só neste aparelho.
+///
+/// No site hospedado, o próprio servidor entrega o app: ali o app é
+/// compilado com `API_URL=origem` e usa o mesmo endereço da página.
 class ApiClient {
   ApiClient({String? baseUrl, EnviarApi? enviar, Duration? limite})
-    : baseUrl = _semBarraFinal(baseUrl ?? _urlDoAmbiente),
+    : baseUrl = _semBarraFinal(resolverEndereco(baseUrl ?? _urlDoAmbiente)),
       _enviar = enviar ?? _enviarPadrao,
       _limite = limite ?? const Duration(seconds: 20);
 
   static const String _urlDoAmbiente = String.fromEnvironment('API_URL');
 
   static final ApiClient instance = ApiClient();
+
+  /// "origem" vira o endereço da própria página (só na web).
+  @visibleForTesting
+  static String resolverEndereco(String s, {String? origemDaPagina}) {
+    if (s.trim() != 'origem') return s;
+    if (origemDaPagina != null) return origemDaPagina;
+    return kIsWeb ? Uri.base.origin : '';
+  }
 
   static String _semBarraFinal(String s) {
     var t = s.trim();
