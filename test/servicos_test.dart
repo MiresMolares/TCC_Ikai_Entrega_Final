@@ -20,13 +20,15 @@ void main() {
       expect(auth.usuarioAtual!.primeiroNome, equals('Administrador'));
     });
 
-    test('e-mail ignora maiúsculas e espaços; campos vazios são recusados',
-        () async {
-      expect(await auth.entrar('  ADM@Email.com ', '1234'), isNull);
-      auth.sair();
-      expect(await auth.entrar('', ''), isNotNull);
-      expect(await auth.entrar('semarroba', '1234'), isNotNull);
-    });
+    test(
+      'e-mail ignora maiúsculas e espaços; campos vazios são recusados',
+      () async {
+        expect(await auth.entrar('  ADM@Email.com ', '1234'), isNull);
+        auth.sair();
+        expect(await auth.entrar('', ''), isNotNull);
+        expect(await auth.entrar('semarroba', '1234'), isNotNull);
+      },
+    );
 
     test('cadastro valida dados e impede e-mail repetido', () async {
       expect(
@@ -34,30 +36,71 @@ void main() {
         isNotNull,
       );
       expect(
-        await auth.cadastrar(nome: 'Ana Souza', email: 'invalido', senha: '1234'),
+        await auth.cadastrar(
+          nome: 'Ana Souza',
+          email: 'invalido',
+          senha: '1234',
+        ),
         isNotNull,
       );
       expect(
-        await auth.cadastrar(nome: 'Ana Souza', email: 'ana@a.com', senha: '12'),
+        await auth.cadastrar(
+          nome: 'Ana Souza',
+          email: 'ana@a.com',
+          senha: '12',
+        ),
         isNotNull,
       );
+      // Só números (ou sem maiúscula, minúscula ou especial) não passa.
+      for (final fraca in [
+        '12345678',
+        'abcdefg1!',
+        'ABCDEFG1!',
+        'Abcdefgh!',
+        'Abcdefg12',
+      ]) {
+        expect(
+          await auth.cadastrar(
+            nome: 'Ana Souza',
+            email: 'ana@a.com',
+            senha: fraca,
+          ),
+          isNotNull,
+          reason: fraca,
+        );
+      }
       expect(
-        await auth.cadastrar(nome: 'Ana Souza', email: 'ana@a.com', senha: 'abcd'),
+        await auth.cadastrar(
+          nome: 'Ana Souza',
+          email: 'ana@a.com',
+          senha: 'Abcd-123',
+        ),
         isNull,
       );
       expect(
-        await auth.cadastrar(nome: 'Outra', email: 'ANA@a.com', senha: 'abcd'),
+        await auth.cadastrar(
+          nome: 'Outra',
+          email: 'ANA@a.com',
+          senha: 'Abcd-123',
+        ),
         isNotNull,
       );
-      expect(await auth.entrar('ana@a.com', 'abcd'), isNull);
+      expect(await auth.entrar('ana@a.com', 'Abcd-123'), isNull);
       expect(auth.usuarioAtual!.primeiroNome, equals('Ana'));
     });
 
     test('atualizar perfil, trocar senha e excluir conta', () async {
-      await auth.cadastrar(nome: 'Bia Lima', email: 'bia@a.com', senha: 'abcd');
-      await auth.entrar('bia@a.com', 'abcd');
+      await auth.cadastrar(
+        nome: 'Bia Lima',
+        email: 'bia@a.com',
+        senha: 'Abcd-123',
+      );
+      await auth.entrar('bia@a.com', 'Abcd-123');
 
-      expect(await auth.atualizarPerfil(nome: 'B', email: 'bia@a.com'), isNotNull);
+      expect(
+        await auth.atualizarPerfil(nome: 'B', email: 'bia@a.com'),
+        isNotNull,
+      );
       expect(
         await auth.atualizarPerfil(nome: 'Bia Souza', email: 'adm@email.com'),
         isNotNull, // e-mail de outra conta
@@ -68,13 +111,19 @@ void main() {
       );
       expect(auth.usuarioAtual!.email, equals('bia2@a.com'));
 
-      expect(await auth.alterarSenha(atual: 'x', nova: 'novasenha'), isNotNull);
-      expect(await auth.alterarSenha(atual: 'abcd', nova: '1'), isNotNull);
-      expect(await auth.alterarSenha(atual: 'abcd', nova: 'novasenha'), isNull);
+      expect(
+        await auth.alterarSenha(atual: 'x', nova: 'Nova-senha1'),
+        isNotNull,
+      );
+      expect(await auth.alterarSenha(atual: 'Abcd-123', nova: '1'), isNotNull);
+      expect(
+        await auth.alterarSenha(atual: 'Abcd-123', nova: 'Nova-senha1'),
+        isNull,
+      );
 
       await auth.excluirConta();
       expect(auth.logado, isFalse);
-      expect(await auth.entrar('bia2@a.com', 'novasenha'), isNotNull);
+      expect(await auth.entrar('bia2@a.com', 'Nova-senha1'), isNotNull);
     });
   });
 
@@ -86,13 +135,15 @@ void main() {
       await lib.carregarPara('a@a.com');
     });
 
-    test('começa com a pasta padrão; todo conteúdo pertence a uma pasta',
-        () async {
-      expect(lib.pastas.length, equals(1));
-      expect(lib.pastas.first.nome, equals('Salvos'));
-      await lib.alternar(lib.pastas.first.id, 'a001');
-      expect(lib.estaSalvo('a001'), isTrue);
-    });
+    test(
+      'começa com a pasta padrão; todo conteúdo pertence a uma pasta',
+      () async {
+        expect(lib.pastas.length, equals(1));
+        expect(lib.pastas.first.nome, equals('Salvos'));
+        await lib.alternar(lib.pastas.first.id, 'a001');
+        expect(lib.estaSalvo('a001'), isTrue);
+      },
+    );
 
     test('um conteúdo pode estar em várias pastas', () async {
       await lib.criarPasta('Estudos');
@@ -107,14 +158,16 @@ void main() {
       expect(lib.estaSalvo('a001'), isTrue); // continua na outra
     });
 
-    test('valida nomes: vazio, repetido (sem diferenciar caixa), muito longo',
-        () async {
-      expect(await lib.criarPasta('  '), isNotNull);
-      expect(await lib.criarPasta('salvos'), isNotNull);
-      expect(await lib.criarPasta('x' * 41), isNotNull);
-      expect(await lib.criarPasta('Leituras'), isNull);
-      expect(lib.pastas.length, equals(2));
-    });
+    test(
+      'valida nomes: vazio, repetido (sem diferenciar caixa), muito longo',
+      () async {
+        expect(await lib.criarPasta('  '), isNotNull);
+        expect(await lib.criarPasta('salvos'), isNotNull);
+        expect(await lib.criarPasta('x' * 41), isNotNull);
+        expect(await lib.criarPasta('Leituras'), isNull);
+        expect(lib.pastas.length, equals(2));
+      },
+    );
 
     test('renomear e excluir pasta', () async {
       await lib.criarPasta('Temp');
@@ -186,26 +239,25 @@ void main() {
       );
       // Hoje ainda sem atividade: continua valendo a partir de ontem.
       expect(
-        ProgressoService.calcularOfensiva(
-          {'2026-11-02', '2026-11-03'},
-          DateTime(2026, 11, 4),
-        ),
+        ProgressoService.calcularOfensiva({
+          '2026-11-02',
+          '2026-11-03',
+        }, DateTime(2026, 11, 4)),
         equals(2),
       );
       // Pulou um dia: zera.
       expect(
-        ProgressoService.calcularOfensiva(
-          {'2026-11-01'},
-          DateTime(2026, 11, 4),
-        ),
+        ProgressoService.calcularOfensiva({
+          '2026-11-01',
+        }, DateTime(2026, 11, 4)),
         equals(0),
       );
       // Virada de mês e de ano.
       expect(
-        ProgressoService.calcularOfensiva(
-          {'2026-12-31', '2027-01-01'},
-          DateTime(2027, 1, 1),
-        ),
+        ProgressoService.calcularOfensiva({
+          '2026-12-31',
+          '2027-01-01',
+        }, DateTime(2027, 1, 1)),
         equals(2),
       );
     });

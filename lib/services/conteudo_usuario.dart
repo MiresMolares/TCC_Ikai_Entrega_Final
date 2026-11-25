@@ -442,7 +442,14 @@ class ConteudoUsuarioService extends ChangeNotifier {
     }
   }
 
-  Future<Resultado<Comentario>> comentar(String artigoId, String texto) async {
+  /// [respostaA]: o comentário que esta mensagem responde. Responder a uma
+  /// resposta vira resposta ao comentário principal (um nível só).
+  Future<Resultado<Comentario>> comentar(
+    String artigoId,
+    String texto, {
+    Comentario? respostaA,
+    String? tituloArtigo,
+  }) async {
     final quem = _quem();
     if (quem == null) return const Resultado.erro('Entre na sua conta.');
     final t = removerEmojis(texto).replaceAll(RegExp(r'[ \t]+'), ' ').trim();
@@ -459,9 +466,10 @@ class ConteudoUsuarioService extends ChangeNotifier {
       autorEmail: quem.email,
       texto: t,
       criadoMs: _agora().millisecondsSinceEpoch,
+      respostaA: respostaA?.respostaA ?? respostaA?.id,
     );
     try {
-      await _repo.salvarComentario(c);
+      await _repo.salvarComentario(c, tituloArtigo: tituloArtigo);
     } catch (e) {
       return Resultado.erro(
         _motivo(e, 'Não foi possível comentar agora. Tente de novo.'),

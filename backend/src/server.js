@@ -8,7 +8,7 @@ const db = await conectar(config);
 const app = criarApp({ db, config });
 
 const servidor = app.listen(config.porta, () => {
-  console.log(`Ikai API em http://localhost:${config.porta} (IA ${config.geminiKey ? 'ligada' : 'desligada'})`);
+  console.log(`Ikai API em http://localhost:${config.porta}`);
 });
 
 for (const sinal of ['SIGINT', 'SIGTERM']) {

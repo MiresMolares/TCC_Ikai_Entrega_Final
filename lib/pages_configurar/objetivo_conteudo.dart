@@ -32,7 +32,7 @@ const List<Categoria> _categoriasConteudo = [
   ),
 ];
 
-final Objetivo objetivoConteudo = Objetivo(
+final Objetivo objetivoConteudo = const Objetivo(
   id: 'ver_conteudo',
   titulo: 'Ver conteúdo',
   descricao: 'Ciência, cultura, esporte, notícias e curiosidades.',

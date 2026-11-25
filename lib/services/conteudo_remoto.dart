@@ -82,8 +82,11 @@ class ConteudoRemoto implements ConteudoRepositorio {
   ];
 
   @override
-  Future<void> salvarComentario(Comentario c) =>
-      _pedir('POST', '/artigos/${c.artigoId}/comentarios', corpo: c.toMap());
+  Future<void> salvarComentario(Comentario c, {String? tituloArtigo}) => _pedir(
+    'POST',
+    '/artigos/${c.artigoId}/comentarios',
+    corpo: {...c.toMap(), 'titulo': ?tituloArtigo},
+  );
 
   @override
   Future<void> apagarComentario(String artigoId, String comentarioId) =>

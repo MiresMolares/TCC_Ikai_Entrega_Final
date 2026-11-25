@@ -20,6 +20,16 @@ export const ESQUEMAS = {
       email: { bsonType: 'string', maxLength: 120, pattern: '^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$' },
       senhaHash: texto(20, 100), // hash bcrypt, nunca a senha
       fotoUrl: { bsonType: ['string', 'null'], maxLength: 300 },
+      // Foto de perfil opcional: a imagem em binário e o tipo dela.
+      foto: {
+        bsonType: 'object',
+        required: ['tipo', 'dados'],
+        properties: {
+          tipo: { enum: ['image/jpeg', 'image/png', 'image/webp'] },
+          dados: { bsonType: 'binData' },
+        },
+      },
+      fotoEm: { bsonType: 'date' },
       criadoEm: { bsonType: 'date' },
     },
   },
@@ -92,9 +102,10 @@ export const ESQUEMAS = {
     required: ['usuarioId', 'tipo', 'titulo', 'descricao', 'criadaEm', 'lida'],
     properties: {
       usuarioId: { bsonType: 'objectId' },
-      tipo: { enum: ['lembrete', 'conquista', 'comunidade', 'sistema'] },
+      tipo: { enum: ['lembrete', 'conquista', 'comunidade', 'sistema', 'comentario', 'resposta'] },
       titulo: texto(1, 80),
       descricao: texto(0, 300),
+      artigoId: { bsonType: 'string' },
       criadaEm: { bsonType: 'date' },
       lida: { bsonType: 'bool' },
     },
@@ -141,6 +152,7 @@ export const ESQUEMAS = {
       autorId: { bsonType: 'objectId' },
       autorNome: texto(1, 80),
       texto: texto(2, 500),
+      respostaA: { bsonType: 'string' },
       criadoEm: { bsonType: 'date' },
     },
   },

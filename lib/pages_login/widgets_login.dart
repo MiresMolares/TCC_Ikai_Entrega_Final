@@ -3,9 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../widgets/estilo.dart';
 
-/// Cor de fundo das telas de login, cadastro e recuperação de senha.
-const Color fundoLogin = Color.fromARGB(255, 237, 241, 243);
-
 /// Logo no topo das telas de login. Mostra o nome se a imagem faltar.
 class LogoIkai extends StatelessWidget {
   final double altura;
@@ -80,9 +77,7 @@ class CampoLogin extends StatelessWidget {
             ? IconButton(
                 tooltip: esconder ? 'Mostrar senha' : 'Ocultar senha',
                 onPressed: aoAlternarVisibilidade,
-                icon: Icon(
-                  esconder ? Icons.visibility : Icons.visibility_off,
-                ),
+                icon: Icon(esconder ? Icons.visibility : Icons.visibility_off),
               )
             : null,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -122,86 +117,3 @@ class BotaoPrincipal extends StatelessWidget {
     );
   }
 }
-
-/// Botão de login social. Ainda não há contas conectadas ao servidor,
-/// então ele apenas informa isso (nunca deixa entrar sem autenticar).
-class BotaoSocial extends StatelessWidget {
-  final String texto;
-  final String imagem;
-  final VoidCallback onPressed;
-  const BotaoSocial({
-    super.key,
-    required this.texto,
-    required this.imagem,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          elevation: 4,
-          shadowColor: Colors.black38,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: const BorderSide(
-              color: Color.fromARGB(255, 238, 210, 29),
-              width: 1.5,
-            ),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              imagem,
-              height: 25,
-              errorBuilder: (context, erro, pilha) =>
-                  const Icon(Icons.login, size: 25),
-            ),
-            const SizedBox(width: 12),
-            Flexible(
-              child: Text(
-                texto,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Divisor "ou".
-class DivisorOu extends StatelessWidget {
-  const DivisorOu({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Expanded(child: Divider(color: Colors.white, thickness: 1)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text('ou', style: GoogleFonts.inter()),
-        ),
-        const Expanded(child: Divider(color: Colors.white, thickness: 1)),
-      ],
-    );
-  }
-}
-
-const String avisoLoginSocial =
-    'O login com Google e Facebook será ativado quando as contas forem '
-    'conectadas ao servidor. Por enquanto, use e-mail e senha.';

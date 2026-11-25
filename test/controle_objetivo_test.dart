@@ -122,11 +122,10 @@ void main() {
       expect(c.ultimaEtapa, 1);
     });
 
-    test('avançado tem 4 etapas, com foco e Ik AI', () {
+    test('avançado tem 3 etapas, terminando no foco', () {
       avancado = true;
-      expect(c.etapas.length, 4);
-      expect(c.etapas.contains(EtapaFluxo.foco), isTrue);
-      expect(c.etapas.last, EtapaFluxo.ikai);
+      expect(c.etapas.length, 3);
+      expect(c.etapas.last, EtapaFluxo.foco);
     });
 
     test('não avança sem escolher o objetivo', () {
@@ -196,7 +195,6 @@ void main() {
       escolherObjetivoECategorias(1);
       expect(await c.confirmar(), isFalse);
       c.avancar(); // foco
-      c.avancar(); // ikai
       expect(await c.confirmar(), isTrue);
     });
 
@@ -207,14 +205,11 @@ void main() {
       expect(c.estado, EstadoSessao.naoIniciada);
     });
 
-    test('iniciante nunca guarda foco nem texto da Ik AI', () async {
+    test('iniciante nunca guarda foco', () async {
       escolherObjetivoECategorias(1);
-      c.definirTextoIkAi('quero relaxar');
       c.definirFoco(15);
       await c.confirmar();
-      expect(c.textoIkAi, isEmpty);
       expect(c.focoMin, 0);
-      expect(c.permitirGemini, isFalse);
     });
 
     test('depois de ativa, escolhas ficam travadas', () async {
@@ -227,7 +222,7 @@ void main() {
     });
   });
 
-  group('Modo avançado: foco e texto', () {
+  group('Modo avançado: foco', () {
     setUp(() => avancado = true);
 
     test('foco só aceita opções válidas', () {
@@ -238,20 +233,6 @@ void main() {
       c.definirFoco(0);
       expect(c.focoMin, 0);
     });
-
-    test('texto é limitado e Gemini exige texto', () {
-      c.definirTextoIkAi('a' * 500);
-      expect(c.textoIkAi.length, ControleObjetivos.limiteTextoIkAi);
-      c.definirPermissaoGemini(true);
-      expect(c.permitirGemini, isTrue);
-      c.definirTextoIkAi('   ');
-      expect(c.permitirGemini, isFalse);
-    });
-
-    test('Gemini não liga sem texto', () {
-      c.definirPermissaoGemini(true);
-      expect(c.permitirGemini, isFalse);
-    });
   });
 
   group('Histórico como sugestão', () {
@@ -260,8 +241,6 @@ void main() {
       escolherObjetivoECategorias(2);
       c.definirFoco(30);
       c.avancar();
-      c.avancar();
-      c.definirTextoIkAi('ler antes de dormir');
       await c.confirmar();
       await Future<void>.delayed(const Duration(milliseconds: 20));
       c.reiniciarSessao();
@@ -271,7 +250,6 @@ void main() {
       expect(c.objetivo, isNull);
       expect(c.sugestaoObjetivoId, objetivoLeitura.id);
       expect(c.sugestaoFoco, 30);
-      expect(c.sugestaoTexto, 'ler antes de dormir');
 
       c.selecionarObjetivo(objetivoLeitura);
       expect(c.sugestaoCategoriaIds.length, 2);
@@ -338,15 +316,12 @@ void main() {
       const s = SelecaoSalva(
         objetivoId: 'ler',
         categoriaIds: ['a', 'b'],
-        texto: 'oi',
-        permitirGemini: true,
         focoMin: 15,
         dia: '2026-11-04',
       );
       final l = SelecaoSalva.tentarLer(s.toJson())!;
       expect(l.categoriaIds, ['a', 'b']);
       expect(l.focoMin, 15);
-      expect(l.permitirGemini, isTrue);
       expect(l.dia, '2026-11-04');
     });
   });

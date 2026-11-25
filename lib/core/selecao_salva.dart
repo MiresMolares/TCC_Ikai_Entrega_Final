@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-/// A escolha do dia (objetivo, categorias, texto da Ik AI), gravada para que
+/// A escolha do dia (objetivos, categorias, foco), gravada para que
 /// fechar o app não obrigue a repetir tudo. Vale só no dia em que foi feita:
 /// no dia seguinte a pessoa escolhe de novo (o feed é finito por escolha).
 /// Dart puro.
@@ -16,8 +16,6 @@ class SelecaoSalva {
   }
 
   final List<String> categoriaIds;
-  final String texto;
-  final bool permitirGemini;
   final int focoMin;
 
   /// 'aaaa-mm-dd' do dia em que a escolha foi feita.
@@ -27,8 +25,6 @@ class SelecaoSalva {
     required this.objetivoId,
     List<String>? objetivoIds,
     required this.categoriaIds,
-    required this.texto,
-    required this.permitirGemini,
     required this.focoMin,
     required this.dia,
   }) : _objetivoIds = objetivoIds;
@@ -40,8 +36,6 @@ class SelecaoSalva {
     'o': objetivoId,
     'os': objetivoIds,
     'c': categoriaIds,
-    't': texto,
-    'g': permitirGemini,
     'f': focoMin,
     'd': dia,
   });
@@ -54,13 +48,9 @@ class SelecaoSalva {
       if (m is! Map) return null;
       final o = m['o'];
       final c = m['c'];
-      final t = m['t'];
-      final g = m['g'];
       final f = m['f'];
       final d = m['d'];
-      if (o is! String || c is! List || t is! String || g is! bool) {
-        return null;
-      }
+      if (o is! String || c is! List) return null;
       if (f is! int || d is! String) return null;
       final ids = c.whereType<String>().toList();
       final os = m['os'] is List
@@ -72,8 +62,6 @@ class SelecaoSalva {
         objetivoId: o,
         objetivoIds: os,
         categoriaIds: ids,
-        texto: t,
-        permitirGemini: g,
         focoMin: f,
         dia: d,
       );

@@ -62,7 +62,7 @@ class _CriarComunidadePageState extends State<CriarComunidadePage> {
     hintText: dica,
     alignLabelWithHint: true,
     filled: true,
-    fillColor: Colors.white,
+    fillColor: Cores.cartao,
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
   );
 
@@ -73,17 +73,14 @@ class _CriarComunidadePageState extends State<CriarComunidadePage> {
       children: [
         Text(
           texto,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
             color: Cores.tituloVerde,
           ),
         ),
         if (ajuda != null)
-          Text(
-            ajuda,
-            style: const TextStyle(fontSize: 12, color: Cores.subtitulo),
-          ),
+          Text(ajuda, style: TextStyle(fontSize: 12, color: Cores.subtitulo)),
       ],
     ),
   );
@@ -107,7 +104,7 @@ class _CriarComunidadePageState extends State<CriarComunidadePage> {
                 color: Cores.verdeClaro,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text(
+              child: Text(
                 'Por enquanto, a comunidade existe só neste aparelho. '
                 'Quando o banco de dados existir, outras pessoas poderão '
                 'entrar.',
@@ -145,14 +142,12 @@ class _CriarComunidadePageState extends State<CriarComunidadePage> {
                       width: 52,
                       height: 52,
                       decoration: BoxDecoration(
-                        color: _icone == e.key
-                            ? const Color(0xFFE4EFE5)
-                            : Colors.white,
+                        color: _icone == e.key ? Cores.selecao : Cores.cartao,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
                           color: _icone == e.key
                               ? Cores.laranja
-                              : const Color(0xFFE0E5DF),
+                              : Cores.bordaNeutra,
                           width: _icone == e.key ? 2 : 1,
                         ),
                       ),
@@ -171,7 +166,7 @@ class _CriarComunidadePageState extends State<CriarComunidadePage> {
                 padding: const EdgeInsets.only(top: 6, bottom: 4),
                 child: Text(
                   o.titulo,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: Cores.subtitulo,

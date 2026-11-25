@@ -75,9 +75,9 @@ class BibliotecaPage extends StatelessWidget {
         builder: (context, _) {
           final pastas = b.pastas;
           if (pastas.isEmpty) {
-            return const Center(
+            return Center(
               child: Padding(
-                padding: EdgeInsets.all(24),
+                padding: const EdgeInsets.all(24),
                 child: Text(
                   'Nenhuma pasta ainda. Crie uma para guardar seus artigos.',
                   textAlign: TextAlign.center,
@@ -93,7 +93,7 @@ class BibliotecaPage extends StatelessWidget {
             itemBuilder: (context, i) {
               final p = pastas[i];
               return Material(
-                color: Colors.white,
+                color: Cores.cartao,
                 borderRadius: BorderRadius.circular(16),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
@@ -111,7 +111,7 @@ class BibliotecaPage extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.folder_outlined, color: Cores.laranja),
+                        Icon(Icons.folder_outlined, color: Cores.laranja),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -119,7 +119,7 @@ class BibliotecaPage extends StatelessWidget {
                             children: [
                               Text(
                                 p.nome,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
                                   color: Cores.titulo,
@@ -129,7 +129,7 @@ class BibliotecaPage extends StatelessWidget {
                                 p.artigoIds.length == 1
                                     ? '1 artigo'
                                     : '${p.artigoIds.length} artigos',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   color: Cores.subtitulo,
                                 ),
@@ -142,12 +142,12 @@ class BibliotecaPage extends StatelessWidget {
                             if (v == 'renomear') _renomear(context, p);
                             if (v == 'excluir') _excluir(context, p);
                           },
-                          itemBuilder: (context) => const [
-                            PopupMenuItem(
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
                               value: 'renomear',
                               child: Text('Renomear'),
                             ),
-                            PopupMenuItem(
+                            const PopupMenuItem(
                               value: 'excluir',
                               child: Text('Excluir'),
                             ),
@@ -218,18 +218,18 @@ class _PastaPageState extends State<PastaPage> {
                     prefixIcon: const Icon(Icons.search),
                     hintText: 'Buscar nesta pasta',
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: Cores.cartao,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Cores.borda),
+                      borderSide: BorderSide(color: Cores.borda),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
               ],
               if (todos.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(top: 48),
+                Padding(
+                  padding: const EdgeInsets.only(top: 48),
                   child: Text(
                     'Esta pasta está vazia. Use o ícone de marcador em um '
                     'artigo para guardá-lo aqui.',
@@ -238,8 +238,8 @@ class _PastaPageState extends State<PastaPage> {
                   ),
                 )
               else if (lista.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(top: 48),
+                Padding(
+                  padding: const EdgeInsets.only(top: 48),
                   child: Text(
                     'Nada encontrado nesta pasta.',
                     textAlign: TextAlign.center,

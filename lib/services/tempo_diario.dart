@@ -17,7 +17,7 @@ enum FaseDoDia {
   /// Dentro do tempo do dia.
   dentro,
 
-  /// O tempo acabou (ou ela pediu para encerrar): a Ik AI abre a conversa.
+  /// O tempo acabou (ou ela pediu para encerrar): abre a tela de fim do dia.
   fimDeTempo,
 
   /// A pessoa encerrou o dia. O app só volta amanhã.
@@ -26,11 +26,11 @@ enum FaseDoDia {
 
 enum TipoAviso { metade, foco }
 
-/// Mensagem da Ik AI que aparece sobre o app, sem bloquear nada.
-class AvisoIk {
+/// Aviso de tempo que aparece sobre o app, sem bloquear nada.
+class AvisoTempo {
   final TipoAviso tipo;
   final String texto;
-  const AvisoIk(this.tipo, this.texto);
+  const AvisoTempo(this.tipo, this.texto);
 }
 
 enum RespostaBalanco { ganhando, perdendo, maisOuMenos }
@@ -98,7 +98,7 @@ class EstadoDoDia {
   }
 }
 
-/// O que a pessoa contou à Ik AI ("aprendi", "quero continuar porque...").
+/// O que a pessoa registrou no fim do dia ("aprendi", "quero continuar porque...").
 class Reflexao {
   final String dia;
 
@@ -155,8 +155,8 @@ enum ResultadoMeta { aplicadaAgora, aPartirDeAmanha, invalida }
 ///
 /// - No primeiro uso a pessoa diz quanto quer usar por dia (a meta).
 /// - O app conta o tempo de uso real do dia (só com o app aberto).
-/// - Na METADE da meta, a Ik AI avisa. No FIM, abre uma conversa: a pessoa
-///   pode contar o que aprendeu, justificar mais um pouco de tempo (no máximo
+/// - Na METADE da meta, o app avisa. No FIM, abre a tela de fim do dia: a
+///   pessoa pode contar o que aprendeu, justificar mais um pouco de tempo (no máximo
 ///   [maxProrrogacoes] vezes por dia) ou encerrar o dia.
 /// - Uma vez por semana a pessoa responde se está ganhando tempo.
 ///
@@ -187,7 +187,7 @@ class TempoDiarioService extends ChangeNotifier {
   late EstadoDoDia _dia = EstadoDoDia(chaveDoDia(DateTime.now()));
   final List<Reflexao> _reflexoes = [];
   final List<Balanco> _balancos = [];
-  AvisoIk? _aviso;
+  AvisoTempo? _aviso;
 
   // Foco da leitura atual (modo avançado). Só em memória.
   int _focoSeg = 0;
@@ -207,7 +207,7 @@ class TempoDiarioService extends ChangeNotifier {
   int get metaSeg => metaMin * 60;
   int? get metaDeAmanhaMin => _metaAmanhaMin;
   bool get avancado => _avancado;
-  AvisoIk? get aviso => _aviso;
+  AvisoTempo? get aviso => _aviso;
   List<Reflexao> get reflexoes => List.unmodifiable(_reflexoes);
   List<Balanco> get balancos => List.unmodifiable(_balancos);
 
@@ -298,7 +298,7 @@ class TempoDiarioService extends ChangeNotifier {
 
   // ---------- Foco da leitura (modo avançado) ----------
 
-  /// [minutos] 0 desliga. O aviso vem da Ik AI, sem bloquear.
+  /// [minutos] 0 desliga. O aviso aparece sem bloquear.
   void definirFoco(int minutos) {
     _focoSeg = minutos > 0 ? minutos * 60 : 0;
     _usoNoInicioDoFoco = usadoHojeSeg;
@@ -344,7 +344,7 @@ class TempoDiarioService extends ChangeNotifier {
 
     if (!_dia.metadeAvisada && usado >= metaSeg ~/ 2) {
       _dia.metadeAvisada = true;
-      _aviso = AvisoIk(TipoAviso.metade, textoDaMetade());
+      _aviso = AvisoTempo(TipoAviso.metade, textoDaMetade());
       mudou = true;
     }
 
@@ -352,7 +352,7 @@ class TempoDiarioService extends ChangeNotifier {
         !_focoAvisado &&
         usado - _usoNoInicioDoFoco >= _focoSeg) {
       _focoAvisado = true;
-      _aviso ??= AvisoIk(TipoAviso.foco, textoDoFoco(_focoSeg ~/ 60));
+      _aviso ??= AvisoTempo(TipoAviso.foco, textoDoFoco(_focoSeg ~/ 60));
       mudou = true;
     }
 
@@ -370,7 +370,7 @@ class TempoDiarioService extends ChangeNotifier {
     if (mudou) notifyListeners();
   }
 
-  // ---------- Textos da Ik AI ----------
+  // ---------- Textos dos avisos ----------
 
   String textoDaMetade() =>
       'Você chegou à metade do seu tempo de hoje: '

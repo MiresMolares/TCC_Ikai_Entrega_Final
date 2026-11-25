@@ -21,8 +21,11 @@ void main() {
 
     test('existem artigos nos três níveis', () {
       for (var n = 1; n <= 3; n++) {
-        expect(artigosDados.where((a) => a.nivel == n), isNotEmpty,
-            reason: 'nível $n');
+        expect(
+          artigosDados.where((a) => a.nivel == n),
+          isNotEmpty,
+          reason: 'nível $n',
+        );
       }
     });
 
@@ -56,8 +59,9 @@ void main() {
         ArtigosRepositorio.feedDaSessao('ler', {'ler_distopia'}, nivel: alvo),
         isNotEmpty,
       );
-      final feedOutro =
-          ArtigosRepositorio.feedDaSessao('ler', {'ler_distopia'}, nivel: outro);
+      final feedOutro = ArtigosRepositorio.feedDaSessao('ler', {
+        'ler_distopia',
+      }, nivel: outro);
       expect(feedOutro.every((a) => a.nivel == outro), isTrue);
       expect(feedOutro.length, lessThanOrEqualTo(conteudosPorSessao));
     });

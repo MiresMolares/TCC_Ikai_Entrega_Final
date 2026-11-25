@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../services/biblioteca_service.dart';
-import '../services/compromisso_service.dart';
 import '../services/progresso_service.dart';
 import '../services/tempo_diario.dart';
 import '../core/uso_diario.dart';
@@ -25,7 +24,6 @@ class ProgressoPage extends StatelessWidget {
       listenable: Listenable.merge([
         ProgressoService.instance,
         BibliotecaService.instance,
-        CompromissoService.instance,
         TempoDiarioService.instance,
       ]),
       builder: (context, _) {
@@ -41,7 +39,7 @@ class ProgressoPage extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           children: [
-            const Text(
+            Text(
               'Seu progresso',
               style: TextStyle(
                 fontSize: 24,
@@ -90,7 +88,7 @@ class ProgressoPage extends StatelessWidget {
             const SizedBox(height: 16),
             const CartaoUsoSemanal(comBarras: true),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Leituras por modo',
               style: TextStyle(
                 fontSize: 16,
@@ -108,10 +106,7 @@ class ProgressoPage extends StatelessWidget {
                       width: 96,
                       child: Text(
                         e.value,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Cores.titulo,
-                        ),
+                        style: TextStyle(fontSize: 13, color: Cores.titulo),
                       ),
                     ),
                     Expanded(
@@ -130,7 +125,7 @@ class ProgressoPage extends StatelessWidget {
                       child: Text(
                         '${porObjetivo[e.key] ?? 0}',
                         textAlign: TextAlign.end,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           color: Cores.titulo,
@@ -141,9 +136,7 @@ class ProgressoPage extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 14),
-            const _CombinadosIkAi(),
-            const SizedBox(height: 14),
-            const Text(
+            Text(
               'Conquistas',
               style: TextStyle(
                 fontSize: 16,
@@ -157,7 +150,7 @@ class ProgressoPage extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 10),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: c.desbloqueada ? Cores.verdeClaro : Colors.white,
+                  color: c.desbloqueada ? Cores.verdeClaro : Cores.cartao,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: c.desbloqueada ? Cores.verde : Cores.borda,
@@ -178,7 +171,7 @@ class ProgressoPage extends StatelessWidget {
                         children: [
                           Text(
                             c.titulo,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: Cores.titulo,
@@ -186,7 +179,7 @@ class ProgressoPage extends StatelessWidget {
                           ),
                           Text(
                             c.descricao,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               color: Cores.subtitulo,
                             ),
@@ -198,7 +191,7 @@ class ProgressoPage extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 6),
-            const Text(
+            Text(
               'Sem ranking: aqui você só se compara com você mesmo.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12, color: Cores.subtitulo),
@@ -206,56 +199,6 @@ class ProgressoPage extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-/// O que a pessoa combinou com a Ik AI e como foi. Só ela vê, e só compara
-/// com ela mesma.
-class _CombinadosIkAi extends StatelessWidget {
-  const _CombinadosIkAi();
-
-  @override
-  Widget build(BuildContext context) {
-    final s = CompromissoService.instance;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Cores.borda),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Combinados com a Ik AI',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Cores.titulo,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            s.todos.isEmpty
-                ? 'Quando você escolher uma ideia no chat da Ik AI, o '
-                    'combinado aparece aqui.'
-                : '${s.feitos} feitos, ${s.parciais} em parte, '
-                    '${s.naoFeitos} não consegui.',
-            style: const TextStyle(fontSize: 13, color: Cores.subtitulo),
-          ),
-          for (final c in s.todos.take(3))
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
-                '${c.titulo} (${c.quando}): '
-                '${c.resposta == null ? 'aguardando' : nomeDaResposta(c.resposta!).toLowerCase()}',
-                style: const TextStyle(fontSize: 12, color: Cores.titulo),
-              ),
-            ),
-        ],
-      ),
     );
   }
 }
@@ -281,7 +224,7 @@ class _Numero extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Cores.cartao,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Cores.borda),
       ),
@@ -290,16 +233,13 @@ class _Numero extends StatelessWidget {
         children: [
           Text(
             valor,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Cores.laranja,
             ),
           ),
-          Text(
-            rotulo,
-            style: const TextStyle(fontSize: 12, color: Cores.subtitulo),
-          ),
+          Text(rotulo, style: TextStyle(fontSize: 12, color: Cores.subtitulo)),
         ],
       ),
     );

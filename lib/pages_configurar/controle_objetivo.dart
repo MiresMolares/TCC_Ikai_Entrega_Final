@@ -91,7 +91,7 @@ enum EstadoSessao { naoIniciada, ativa }
 
 /// Etapas do fluxo. O modo iniciante tem as duas primeiras; o avançado, as
 /// quatro.
-enum EtapaFluxo { objetivo, categorias, foco, ikai }
+enum EtapaFluxo { objetivo, categorias, foco }
 
 /// Fonte de verdade da escolha atual. A escolha do dia é gravada (vale só no
 /// dia), e o histórico, usado como SUGESTÃO (nunca aplicado sozinho), fica
@@ -114,10 +114,7 @@ class ControleObjetivos extends ChangeNotifier {
   static const _kObjetivo = 'hist_objetivo_id';
   static const _kCategorias = 'hist_categoria_id'; // ids separados por vírgula
   static const _kFoco = 'hist_foco_min';
-  static const _kTexto = 'hist_texto_ikai';
   static const _kSelecao = 'selecao_v1';
-
-  static const int limiteTextoIkAi = 300;
 
   /// Mais categorias que isso deixa o feed (fixo em 8) sem foco.
   static const int maxCategorias = 5;
@@ -134,12 +131,7 @@ class ControleObjetivos extends ChangeNotifier {
   /// "Passar o tempo" não tem categorias: a etapa de categorias some.
   List<EtapaFluxo> get etapas {
     final todas = _avancado()
-        ? const [
-            EtapaFluxo.objetivo,
-            EtapaFluxo.categorias,
-            EtapaFluxo.foco,
-            EtapaFluxo.ikai,
-          ]
+        ? const [EtapaFluxo.objetivo, EtapaFluxo.categorias, EtapaFluxo.foco]
         : const [EtapaFluxo.objetivo, EtapaFluxo.categorias];
     return modoLivre
         ? todas.where((e) => e != EtapaFluxo.categorias).toList()
@@ -184,8 +176,6 @@ class ControleObjetivos extends ChangeNotifier {
   }
 
   int focoMin = 0;
-  String textoIkAi = '';
-  bool permitirGemini = false;
 
   List<Categoria> get categorias => List.unmodifiable(_categorias);
 
@@ -194,7 +184,7 @@ class ControleObjetivos extends ChangeNotifier {
 
   bool temCategoria(String id) => _categorias.any((c) => c.id == id);
 
-  /// "Romance, Fantasia" (para telas e para a Ik AI).
+  /// "Romance, Fantasia" (para as telas).
   String get titulosDasCategorias => modoLivre
       ? 'Um pouco de tudo'
       : _categorias.map((c) => c.titulo).join(', ');
@@ -205,7 +195,6 @@ class ControleObjetivos extends ChangeNotifier {
   String? _hObjetivo;
   List<String> _hCategorias = const [];
   int? _hFoco;
-  String? _hTexto;
 
   /// Cada conta tem o próprio histórico.
   String _chave(String base) =>
@@ -221,7 +210,6 @@ class ControleObjetivos extends ChangeNotifier {
           ? const []
           : cats.split(',').where((c) => c.isNotEmpty).toList();
       _hFoco = p.getInt(_chave(_kFoco));
-      _hTexto = p.getString(_chave(_kTexto));
     } catch (_) {
       // Falha de leitura nunca impede o uso.
     }
@@ -235,7 +223,6 @@ class ControleObjetivos extends ChangeNotifier {
     _hObjetivo = null;
     _hCategorias = const [];
     _hFoco = null;
-    _hTexto = null;
   }
 
   Future<void> _salvarHistorico() async {
@@ -244,13 +231,11 @@ class ControleObjetivos extends ChangeNotifier {
     _hObjetivo = ids;
     _hCategorias = _categorias.map((c) => c.id).toList();
     _hFoco = focoMin;
-    _hTexto = textoIkAi.trim();
     try {
       final p = await SharedPreferences.getInstance();
       await p.setString(_chave(_kObjetivo), ids);
       await p.setString(_chave(_kCategorias), _hCategorias.join(','));
       await p.setInt(_chave(_kFoco), focoMin);
-      await p.setString(_chave(_kTexto), textoIkAi.trim());
     } catch (_) {
       // Falha ao gravar não impede o uso.
     }
@@ -279,11 +264,6 @@ class ControleObjetivos extends ChangeNotifier {
   int? get sugestaoFoco {
     final f = _hFoco;
     return (f != null && f > 0 && opcoesFoco.contains(f)) ? f : null;
-  }
-
-  String? get sugestaoTexto {
-    final t = _hTexto?.trim();
-    return (t == null || t.isEmpty) ? null : t;
   }
 
   // ---------- Ações de escolha (sempre explícitas) ----------
@@ -359,28 +339,6 @@ class ControleObjetivos extends ChangeNotifier {
     if (f != null) definirFoco(f);
   }
 
-  void definirTextoIkAi(String texto) {
-    if (_estado != EstadoSessao.naoIniciada) return;
-    textoIkAi = texto.length > limiteTextoIkAi
-        ? texto.substring(0, limiteTextoIkAi)
-        : texto;
-    if (textoIkAi.trim().isEmpty) permitirGemini = false;
-    notifyListeners();
-  }
-
-  /// Chamado só quando o usuário TOCA na sugestão de texto.
-  void aplicarSugestaoTexto() {
-    final t = sugestaoTexto;
-    if (t != null) definirTextoIkAi(t);
-  }
-
-  /// O envio do texto ao Gemini só vale com autorização explícita e texto.
-  void definirPermissaoGemini(bool valor) {
-    if (_estado != EstadoSessao.naoIniciada) return;
-    permitirGemini = valor && textoIkAi.trim().isNotEmpty;
-    notifyListeners();
-  }
-
   /// Toda categoria é de um objetivo escolhido, e cada objetivo escolhido
   /// tem pelo menos uma categoria (senão ele não aparece no feed).
   bool get _categoriasValidas {
@@ -410,8 +368,7 @@ class ControleObjetivos extends ChangeNotifier {
       case EtapaFluxo.categorias:
         return _categoriasValidas;
       case EtapaFluxo.foco:
-      case EtapaFluxo.ikai:
-        return true; // opcionais
+        return true; // opcional
     }
   }
 
@@ -442,8 +399,6 @@ class ControleObjetivos extends ChangeNotifier {
       // No modo iniciante estas opções nem aparecem: ficam vazias.
       if (!_avancado()) {
         focoMin = 0;
-        textoIkAi = '';
-        permitirGemini = false;
       }
       _estado = EstadoSessao.ativa;
       TempoDiarioService.instance.definirFoco(focoMin);
@@ -467,8 +422,6 @@ class ControleObjetivos extends ChangeNotifier {
       objetivoId: _objetivos.first.id,
       objetivoIds: _objetivos.map((o) => o.id).toList(),
       categoriaIds: _categorias.map((c) => c.id).toList(),
-      texto: textoIkAi.trim(),
-      permitirGemini: permitirGemini,
       focoMin: focoMin,
       dia: chaveDoDia(_agora()),
     );
@@ -518,8 +471,6 @@ class ControleObjetivos extends ChangeNotifier {
       await _apagarSelecao();
       return;
     }
-    textoIkAi = s.texto;
-    permitirGemini = s.permitirGemini;
     focoMin = s.focoMin;
     _estado = EstadoSessao.ativa;
     notifyListeners();
@@ -540,8 +491,6 @@ class ControleObjetivos extends ChangeNotifier {
     _objetivos.clear();
     _categorias.clear();
     focoMin = 0;
-    textoIkAi = '';
-    permitirGemini = false;
     notifyListeners();
   }
 }

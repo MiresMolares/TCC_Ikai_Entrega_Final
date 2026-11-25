@@ -6,52 +6,8 @@ import 'package:ikai/data/artigos_dados.dart';
 import 'package:ikai/pages_configurar/controle_objetivo.dart';
 import 'package:ikai/pages_configurar/objetivo_leitura.dart';
 import 'package:ikai/services/artigos_repositorio.dart';
-import 'package:ikai/services/sugestoes_locais.dart';
 
 void main() {
-  group('Sugestões locais (plano B da Ik AI)', () {
-    test('exemplo do projeto: leitura, treino e francês', () {
-      final s = SugestoesLocais.gerar(
-        texto:
-            'Estou lendo Capitães da Areia, treinando em casa e '
-            'buscando me tornar fluente em francês',
-        objetivoTitulo: 'Ler',
-      );
-      expect(s.length, equals(3));
-      expect(s[0], contains('Capitães da Areia'));
-      expect(s[0], contains('leia'));
-      expect(s[1], contains('treino'));
-      expect(s[2], contains('francês'));
-      expect(s[2], contains('prática'));
-    });
-
-    test('sem texto, devolve 3 sugestões genéricas', () {
-      final s = SugestoesLocais.gerar(texto: '', objetivoTitulo: 'Estudar');
-      expect(s.length, equals(3));
-      expect(s[0], contains('exercícios'));
-    });
-
-    test('com um só interesse, completa até 3', () {
-      final s = SugestoesLocais.gerar(texto: 'academia');
-      expect(s.length, equals(3));
-      expect(s[0], contains('treino'));
-    });
-
-    test('mais de 3 interesses: usa só os 3 primeiros', () {
-      final s = SugestoesLocais.gerar(
-        texto: 'academia, inglês, escrever letras, estudar para a prova',
-      );
-      expect(s.length, equals(3));
-    });
-
-    test('nunca devolve emojis, nem quando o usuário escreve emojis', () {
-      final s = SugestoesLocais.gerar(texto: 'treinando \u{1F4AA} e lendo');
-      for (final item in s) {
-        expect(temEmoji(item), isFalse);
-      }
-    });
-  });
-
   group('Artigos', () {
     test('ids de artigo são únicos', () {
       final ids = artigosDados.map((a) => a.id).toList();

@@ -46,7 +46,7 @@ class _MetaDiariaPageState extends State<MetaDiariaPage> {
               Expanded(
                 child: ListView(
                   children: [
-                    const Text(
+                    Text(
                       'Quanto tempo você quer usar o Ikai por dia?',
                       style: TextStyle(
                         fontSize: 28,
@@ -55,10 +55,10 @@ class _MetaDiariaPageState extends State<MetaDiariaPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'A meta é sua. A Ik AI avisa quando você chegar na '
-                      'metade e, no fim, conversa com você sobre o que '
-                      'aprendeu. Você pode mudar isso depois.',
+                    Text(
+                      'A meta é sua. O Ikai avisa quando você chegar na '
+                      'metade e, no fim, pergunta o que você aprendeu. '
+                      'Você pode mudar isso depois.',
                       style: TextStyle(
                         fontSize: 15,
                         height: 1.4,
@@ -69,21 +69,21 @@ class _MetaDiariaPageState extends State<MetaDiariaPage> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Cores.cartao,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFE0E5DF)),
+                        border: Border.all(color: Cores.bordaNeutra),
                       ),
                       child: Column(
                         children: [
                           Text(
                             formatarHm(_minutos * 60),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 36,
                               fontWeight: FontWeight.bold,
                               color: Cores.laranja,
                             ),
                           ),
-                          const Text(
+                          Text(
                             'por dia',
                             style: TextStyle(
                               fontSize: 13,
@@ -114,13 +114,13 @@ class _MetaDiariaPageState extends State<MetaDiariaPage> {
                           ChoiceChip(
                             label: Text(formatarHm(m * 60)),
                             selected: _minutos == m,
-                            selectedColor: const Color(0xFFE4EFE5),
+                            selectedColor: Cores.selecao,
                             onSelected: (_) => setState(() => _minutos = m),
                           ),
                       ],
                     ),
                     const SizedBox(height: 28),
-                    const Text(
+                    Text(
                       'Qual versão combina com você?',
                       style: TextStyle(
                         fontSize: 18,
@@ -141,9 +141,8 @@ class _MetaDiariaPageState extends State<MetaDiariaPage> {
                     _OpcaoVersao(
                       titulo: 'Avançado',
                       descricao:
-                          'Inclui um lembrete de foco por leitura e '
-                          'um espaço para contar à Ik AI o que você quer '
-                          'fazer longe da tela.',
+                          'Inclui um lembrete de foco por leitura, para '
+                          'você decidir quando fazer uma pausa.',
                       selecionada: _avancado,
                       onTap: () => setState(() => _avancado = true),
                     ),
@@ -198,10 +197,10 @@ class _OpcaoVersao extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: selecionada ? const Color(0xFFE4EFE5) : Colors.white,
+          color: selecionada ? Cores.selecao : Cores.cartao,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selecionada ? Cores.laranja : const Color(0xFFE0E5DF),
+            color: selecionada ? Cores.laranja : Cores.bordaNeutra,
             width: selecionada ? 2 : 1,
           ),
         ),
@@ -213,7 +212,7 @@ class _OpcaoVersao extends StatelessWidget {
                 children: [
                   Text(
                     titulo,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Cores.tituloVerde,
@@ -222,7 +221,7 @@ class _OpcaoVersao extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     descricao,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       height: 1.4,
                       color: Cores.subtitulo,

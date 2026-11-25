@@ -6,8 +6,6 @@ export function lerConfig(env = process.env) {
     mongoDb: env.MONGODB_DB || 'ikai',
     jwtSecret: env.JWT_SECRET || '',
     jwtExpira: env.JWT_EXPIRA || '7d',
-    geminiKey: env.GEMINI_API_KEY || '',
-    geminiModelo: env.GEMINI_MODEL || 'gemini-3.8-flash',
     corsOrigem: env.CORS_ORIGEM || '*',
     bcryptCusto: Number(env.BCRYPT_CUSTO || 10),
     limitarLogin: env.LIMITAR_LOGIN !== 'nao',

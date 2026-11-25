@@ -61,7 +61,7 @@ const List<Categoria> _materias = [
   ),
 ];
 
-final Objetivo objetivoEstudo = Objetivo(
+final Objetivo objetivoEstudo = const Objetivo(
   id: 'estudar',
   titulo: 'Estudar',
   descricao: 'Matérias da escola, do básico ao avançado.',

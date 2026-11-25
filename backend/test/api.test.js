@@ -8,18 +8,6 @@ import { lerConfig } from '../src/config.js';
 import { conectar } from '../src/db.js';
 
 let db, servidor, base;
-const chamadasGemini = [];
-let respostaGemini = { status: 200, corpo: { candidates: [{ content: { parts: [{ text: '{"resposta":"oi","ideias":[]}' }] } }] } };
-
-const fetchFalso = async (url, init) => {
-  chamadasGemini.push({ url, init });
-  return {
-    ok: respostaGemini.status < 300,
-    status: respostaGemini.status,
-    text: async () => JSON.stringify(respostaGemini.corpo),
-  };
-};
-
 async function chamar(metodo, caminho, corpo, token) {
   const r = await fetch(base + caminho, {
     method: metodo,
@@ -35,7 +23,7 @@ async function chamar(metodo, caminho, corpo, token) {
   return { status: r.status, json };
 }
 
-async function novaConta(nome, email, senha = 'senha-forte-1') {
+async function novaConta(nome, email, senha = 'Senha-forte-1') {
   const r = await chamar('POST', '/auth/cadastro', { nome, email, senha });
   assert.equal(r.status, 201, JSON.stringify(r.json));
   return r.json.token;
@@ -70,12 +58,11 @@ before(async () => {
     mongoUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017',
     mongoDb: `ikai_teste_${Date.now()}`,
     jwtSecret: 'segredo-de-teste-bem-longo',
-    geminiKey: 'chave-falsa',
     bcryptCusto: 4,
     limitarLogin: false,
   };
   db = await conectar(config);
-  const app = criarApp({ db, config, fetchImpl: fetchFalso });
+  const app = criarApp({ db, config });
   await new Promise((ok) => { servidor = app.listen(0, '127.0.0.1', ok); });
   base = `http://127.0.0.1:${servidor.address().port}`;
 });
@@ -87,9 +74,9 @@ after(async () => {
 });
 
 describe('saúde e erros gerais', () => {
-  test('GET /saude diz se a IA está ligada', async () => {
+  test('GET /saude responde', async () => {
     const r = await chamar('GET', '/saude');
-    assert.deepEqual(r.json, { ok: true, ia: true });
+    assert.deepEqual(r.json, { ok: true });
   });
   test('rota desconhecida dá 404 em JSON', async () => {
     const r = await chamar('GET', '/nada');
@@ -98,7 +85,7 @@ describe('saúde e erros gerais', () => {
   });
   test('sem token, conteúdo é negado', async () => {
     assert.equal((await chamar('GET', '/artigos')).status, 401);
-    assert.equal((await chamar('POST', '/ia/gemini', {})).status, 401);
+    assert.equal((await chamar('POST', '/ia/gemini', {})).status, 404); // a IA saiu do Ikai
   });
   test('token inválido é negado', async () => {
     assert.equal((await chamar('GET', '/artigos', undefined, 'lixo')).status, 401);
@@ -108,23 +95,27 @@ describe('saúde e erros gerais', () => {
 describe('login', () => {
   test('cadastro cria conta, guarda hash e nunca devolve a senha', async () => {
     const r = await chamar('POST', '/auth/cadastro', {
-      nome: 'Ana Souza', email: ' ANA@Teste.com ', senha: 'senha-forte-1',
+      nome: 'Ana Souza', email: ' ANA@Teste.com ', senha: 'Senha-forte-1',
     });
     assert.equal(r.status, 201);
     assert.equal(r.json.usuario.email, 'ana@teste.com');
-    assert.equal(r.json.ia, true);
+    assert.equal(r.json.ia, undefined);
+    assert.equal(r.json.usuario.foto, null);
     assert.ok(r.json.token);
-    assert.equal(JSON.stringify(r.json).includes('senha-forte-1'), false);
+    assert.equal(JSON.stringify(r.json).includes('Senha-forte-1'), false);
     const doc = await db.usuarios.findOne({ email: 'ana@teste.com' });
-    assert.notEqual(doc.senhaHash, 'senha-forte-1');
+    assert.notEqual(doc.senhaHash, 'Senha-forte-1');
     assert.ok(doc.senhaHash.startsWith('$2'));
   });
 
   test('valida nome, e-mail e senha', async () => {
-    const base = { nome: 'Bia Lima', email: 'bia@teste.com', senha: 'senha-forte-1' };
+    const base = { nome: 'Bia Lima', email: 'bia@teste.com', senha: 'Senha-forte-1' };
     for (const ruim of [
       { nome: 'A' }, { email: 'sem-arroba' }, { senha: '1234567' },
       { senha: 'x'.repeat(73) },
+      // Senha fraca: só números, sem maiúscula, sem especial, sem número.
+      { senha: '12345678' }, { senha: 'senha-forte-1' }, { senha: 'SenhaForte1' },
+      { senha: 'Senha-forte' },
     ]) {
       const r = await chamar('POST', '/auth/cadastro', { ...base, ...ruim });
       assert.equal(r.status, 400, JSON.stringify(ruim));
@@ -134,19 +125,19 @@ describe('login', () => {
   test('e-mail repetido (qualquer caixa) dá 409', async () => {
     await novaConta('Caio Dois', 'dup@teste.com');
     const r = await chamar('POST', '/auth/cadastro', {
-      nome: 'Outro', email: 'DUP@teste.com', senha: 'senha-forte-1',
+      nome: 'Outro', email: 'DUP@teste.com', senha: 'Senha-forte-1',
     });
     assert.equal(r.status, 409);
   });
 
   test('login certo e errado', async () => {
     await novaConta('Dani Cruz', 'dani@teste.com');
-    const ok = await chamar('POST', '/auth/login', { email: 'DANI@teste.com', senha: 'senha-forte-1' });
+    const ok = await chamar('POST', '/auth/login', { email: 'DANI@teste.com', senha: 'Senha-forte-1' });
     assert.equal(ok.status, 200);
     assert.equal(ok.json.usuario.nome, 'Dani Cruz');
     const errada = await chamar('POST', '/auth/login', { email: 'dani@teste.com', senha: 'errada-errada' });
     assert.equal(errada.status, 401);
-    const inexistente = await chamar('POST', '/auth/login', { email: 'nao@teste.com', senha: 'senha-forte-1' });
+    const inexistente = await chamar('POST', '/auth/login', { email: 'nao@teste.com', senha: 'Senha-forte-1' });
     assert.equal(inexistente.status, 401);
     assert.equal(inexistente.json.erro, errada.json.erro); // não revela se o e-mail existe
     assert.equal((await chamar('POST', '/auth/login', { email: '', senha: '' })).status, 400);
@@ -160,11 +151,12 @@ describe('login', () => {
     assert.equal(p.json.usuario.email, 'eva@teste.com'); // e-mail não muda por aqui
     assert.equal((await chamar('PATCH', '/auth/eu', { nome: 'E' }, t)).status, 400);
 
-    assert.equal((await chamar('POST', '/auth/senha', { atual: 'x', nova: 'nova-senha-1' }, t)).status, 400);
-    assert.equal((await chamar('POST', '/auth/senha', { atual: 'senha-forte-1', nova: '123' }, t)).status, 400);
-    assert.equal((await chamar('POST', '/auth/senha', { atual: 'senha-forte-1', nova: 'nova-senha-1' }, t)).status, 204);
-    assert.equal((await chamar('POST', '/auth/login', { email: 'eva@teste.com', senha: 'senha-forte-1' })).status, 401);
-    assert.equal((await chamar('POST', '/auth/login', { email: 'eva@teste.com', senha: 'nova-senha-1' })).status, 200);
+    assert.equal((await chamar('POST', '/auth/senha', { atual: 'x', nova: 'Nova-senha-1' }, t)).status, 400);
+    assert.equal((await chamar('POST', '/auth/senha', { atual: 'Senha-forte-1', nova: '123' }, t)).status, 400);
+    assert.equal((await chamar('POST', '/auth/senha', { atual: 'Senha-forte-1', nova: '87654321' }, t)).status, 400);
+    assert.equal((await chamar('POST', '/auth/senha', { atual: 'Senha-forte-1', nova: 'Nova-senha-1' }, t)).status, 204);
+    assert.equal((await chamar('POST', '/auth/login', { email: 'eva@teste.com', senha: 'Senha-forte-1' })).status, 401);
+    assert.equal((await chamar('POST', '/auth/login', { email: 'eva@teste.com', senha: 'Nova-senha-1' })).status, 200);
   });
 });
 
@@ -365,6 +357,90 @@ describe('comentários', () => {
   });
 });
 
+describe('respostas e notificações', () => {
+  test('responder fica em um nível só e avisa o autor do comentário e do artigo', async () => {
+    const autor = await novaConta('Ada Lima', 'ada.lima@teste.com');
+    const leitor = await novaConta('Bento Lima', 'bento.lima@teste.com');
+    const outro = await novaConta('Caio Lima', 'caio.lima@teste.com');
+    const { json: art } = await chamar('POST', '/artigos', artigoValido(), autor);
+
+    // Comentário no artigo: avisa só o autor do artigo.
+    const { json: c1 } = await chamar('POST', `/artigos/${art.id}/comentarios`, { texto: 'Gostei do texto!' }, leitor);
+    let caixa = (await chamar('GET', '/notificacoes', undefined, autor)).json;
+    assert.equal(caixa.naoLidas, 1);
+    assert.equal(caixa.itens[0].tipo, 'comentario');
+    assert.equal(caixa.itens[0].titulo, 'Bento comentou no seu artigo');
+    assert.equal(caixa.itens[0].artigo, art.id);
+    assert.equal((await chamar('GET', '/notificacoes', undefined, leitor)).json.naoLidas, 0);
+
+    // Resposta: avisa quem comentou e o autor do artigo.
+    const r1 = await chamar('POST', `/artigos/${art.id}/comentarios`, { texto: 'Concordo!', resposta: c1.id }, outro);
+    assert.equal(r1.status, 201, JSON.stringify(r1.json));
+    assert.equal(r1.json.resposta, c1.id);
+    const doLeitor = (await chamar('GET', '/notificacoes', undefined, leitor)).json;
+    assert.equal(doLeitor.itens[0].tipo, 'resposta');
+    assert.equal(doLeitor.itens[0].titulo, 'Caio respondeu ao seu comentário');
+    assert.equal((await chamar('GET', '/notificacoes', undefined, autor)).json.naoLidas, 2);
+
+    // Resposta a uma resposta vira resposta ao comentário principal.
+    const r2 = await chamar('POST', `/artigos/${art.id}/comentarios`, { texto: 'Eu também.', resposta: r1.json.id }, leitor);
+    assert.equal(r2.json.resposta, c1.id);
+
+    // O autor respondendo no próprio artigo não avisa a si mesmo.
+    await chamar('POST', `/artigos/${art.id}/comentarios`, { texto: 'Obrigada!', resposta: c1.id }, autor);
+    assert.equal((await chamar('GET', '/notificacoes', undefined, autor)).json.naoLidas, 3);
+
+    // Responder a algo que não existe dá 404.
+    const nao = await chamar('POST', `/artigos/${art.id}/comentarios`, { texto: 'Oi?', resposta: 'k000000000' }, outro);
+    assert.equal(nao.status, 404);
+
+    // Apagar o comentário principal leva as respostas junto.
+    assert.equal((await chamar('DELETE', `/artigos/${art.id}/comentarios/${c1.id}`, undefined, leitor)).status, 204);
+    assert.equal(await db.comentarios.countDocuments({ artigoId: art.id }), 0);
+  });
+
+  test('no acervo, a resposta avisa quem comentou com o título enviado pelo app', async () => {
+    const a = await novaConta('Dora Lima', 'dora.lima@teste.com');
+    const b = await novaConta('Edu Lima', 'edu.lima@teste.com');
+    const { json: c } = await chamar('POST', '/artigos/a010/comentarios', { texto: 'Muito bom.' }, a);
+    await chamar('POST', '/artigos/a010/comentarios', { texto: 'Verdade.', resposta: c.id, titulo: 'Um título' }, b);
+    const caixa = (await chamar('GET', '/notificacoes', undefined, a)).json;
+    assert.equal(caixa.itens[0].descricao, 'Em "Um título": Verdade.');
+  });
+});
+
+describe('foto de perfil', () => {
+  // PNG de 1x1 pixel.
+  const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+
+  test('coloca, aparece no login e nos comentários, troca e remove', async () => {
+    const t = await novaConta('Fia Lima', 'fia.lima@teste.com');
+    assert.equal((await chamar('PUT', '/auth/eu/foto', { foto: PNG })).status, 401);
+    assert.equal((await chamar('PUT', '/auth/eu/foto', { foto: 'não é base64' }, t)).status, 400);
+    assert.equal((await chamar('PUT', '/auth/eu/foto', { foto: Buffer.from('texto').toString('base64') }, t)).status, 400);
+
+    const r = await chamar('PUT', '/auth/eu/foto', { foto: PNG }, t);
+    assert.equal(r.status, 200);
+    assert.match(r.json.foto, /^\/usuarios\/[0-9a-f]{24}\/foto\?v=\d+$/);
+
+    const img = await fetch(base + r.json.foto);
+    assert.equal(img.status, 200);
+    assert.equal(img.headers.get('content-type'), 'image/png');
+
+    assert.equal((await chamar('GET', '/auth/eu', undefined, t)).json.usuario.foto, r.json.foto);
+    const login = await chamar('POST', '/auth/login', { email: 'fia.lima@teste.com', senha: 'Senha-forte-1' });
+    assert.equal(login.json.usuario.foto, r.json.foto);
+
+    await chamar('POST', '/artigos/a011/comentarios', { texto: 'Com foto.' }, t);
+    const lista = (await chamar('GET', '/artigos/a011/comentarios', undefined, t)).json;
+    assert.equal(lista.at(-1).foto, r.json.foto);
+
+    assert.equal((await chamar('DELETE', '/auth/eu/foto', undefined, t)).status, 204);
+    assert.equal((await chamar('GET', '/auth/eu', undefined, t)).json.usuario.foto, null);
+    assert.equal((await fetch(base + r.json.foto)).status, 404);
+  });
+});
+
 describe('comunidades e mensagens', () => {
   test('cria, lista e não deixa nome repetido (sem acento/caixa) nem usar nome de fixa', async () => {
     const a = await novaConta('Noa Dias', 'noa@teste.com');
@@ -478,94 +554,3 @@ describe('exclusão de conta', () => {
   });
 });
 
-describe('proxy do Gemini', () => {
-  const corpo = (extra = {}) => ({
-    system_instruction: { parts: [{ text: 'Você é a Ik AI.' }] },
-    contents: [{ role: 'user', parts: [{ text: '<declarado>oi</declarado>' }] }],
-    generationConfig: { temperature: 0.8, maxOutputTokens: 2048, responseMimeType: 'application/json' },
-    ...extra,
-  });
-
-  test('encaminha com a chave do servidor e devolve a resposta do Gemini', async () => {
-    const t = await novaConta('Ia Dias', 'ia@teste.com');
-    chamadasGemini.length = 0;
-    const r = await chamar('POST', '/ia/gemini', corpo(), t);
-    assert.equal(r.status, 200);
-    assert.equal(r.json.candidates[0].content.parts[0].text, '{"resposta":"oi","ideias":[]}');
-    assert.equal(chamadasGemini.length, 1);
-    const { url, init } = chamadasGemini[0];
-    assert.ok(url.includes('/models/gemini-3.8-flash:generateContent'));
-    assert.equal(init.headers['x-goog-api-key'], 'chave-falsa');
-    const enviado = JSON.parse(init.body);
-    assert.equal(enviado.generationConfig.responseMimeType, 'application/json');
-  });
-
-  test('descarta campos fora do formato e limita os números', async () => {
-    const t = await novaConta('Ib Dias', 'ib@teste.com');
-    chamadasGemini.length = 0;
-    await chamar('POST', '/ia/gemini', corpo({
-      tools: [{ googleSearch: {} }],
-      safetySettings: [],
-      generationConfig: { temperature: 99, maxOutputTokens: 999999, responseMimeType: 'text/plain', candidateCount: 8 },
-    }), t);
-    const enviado = JSON.parse(chamadasGemini[0].init.body);
-    assert.deepEqual(Object.keys(enviado).sort(), ['contents', 'generationConfig', 'system_instruction']);
-    assert.equal(enviado.generationConfig.temperature, 1.5);
-    assert.equal(enviado.generationConfig.maxOutputTokens, 8192);
-    assert.equal(enviado.generationConfig.responseMimeType, 'application/json');
-    assert.equal(enviado.generationConfig.candidateCount, undefined);
-  });
-
-  test('rejeita conversa vazia, grande demais ou mal formada', async () => {
-    const t = await novaConta('Ic Dias', 'ic@teste.com');
-    for (const ruim of [
-      {}, { contents: [] }, { contents: 'x' },
-      { contents: [{ role: 'user', parts: [] }] },
-      { contents: [{ role: 'user', parts: [{ text: 'x'.repeat(6001) }] }] },
-      { contents: Array.from({ length: 15 }, () => ({ role: 'user', parts: [{ text: 'a' }] })) },
-    ]) {
-      assert.equal((await chamar('POST', '/ia/gemini', ruim, t)).status, 400);
-    }
-  });
-
-  test('erro do Gemini vira 502 sem vazar detalhes, e a chave nunca aparece', async () => {
-    const t = await novaConta('Id Dias', 'id@teste.com');
-    respostaGemini = { status: 404, corpo: { error: { message: 'models/xyz is not found' } } };
-    const r = await chamar('POST', '/ia/gemini', corpo(), t);
-    assert.equal(r.status, 502);
-    assert.equal(JSON.stringify(r.json).includes('chave-falsa'), false);
-    assert.equal(JSON.stringify(r.json).includes('xyz'), false);
-    respostaGemini = { status: 200, corpo: { candidates: [{ content: { parts: [{ text: '{"resposta":"oi","ideias":[]}' }] } }] } };
-  });
-
-  test('limite por hora', async () => {
-    const t = await novaConta('Ie Dias', 'ie@teste.com');
-    for (let i = 0; i < 60; i++) {
-      assert.equal((await chamar('POST', '/ia/gemini', corpo(), t)).status, 200);
-    }
-    assert.equal((await chamar('POST', '/ia/gemini', corpo(), t)).status, 429);
-  });
-});
-
-test('sem chave no servidor, a IA responde 503 e /saude avisa', async () => {
-  const config = { ...lerConfig({}), jwtSecret: 'segredo-de-teste-bem-longo', geminiKey: '', bcryptCusto: 4, limitarLogin: false };
-  const app = criarApp({ db, config, fetchImpl: fetchFalso });
-  const srv = await new Promise((ok) => { const s = app.listen(0, '127.0.0.1', () => ok(s)); });
-  try {
-    const url = `http://127.0.0.1:${srv.address().port}`;
-    assert.deepEqual(await (await fetch(`${url}/saude`)).json(), { ok: true, ia: false });
-    const cad = await (await fetch(`${url}/auth/cadastro`, {
-      method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ nome: 'Sem Chave', email: 'semchave@teste.com', senha: 'senha-forte-1' }),
-    })).json();
-    assert.equal(cad.ia, false);
-    const r = await fetch(`${url}/ia/gemini`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${cad.token}` },
-      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'oi' }] }] }),
-    });
-    assert.equal(r.status, 503);
-  } finally {
-    await new Promise((ok) => srv.close(ok));
-  }
-});

@@ -58,7 +58,7 @@ const List<Categoria> _categoriasLeitura = [
   ),
 ];
 
-final Objetivo objetivoLeitura = Objetivo(
+final Objetivo objetivoLeitura = const Objetivo(
   id: 'ler',
   titulo: 'Ler',
   descricao: 'Histórias e textos para ler com calma, no seu ritmo.',

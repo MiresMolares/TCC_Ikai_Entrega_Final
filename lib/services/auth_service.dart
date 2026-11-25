@@ -1,12 +1,16 @@
 import 'package:flutter/foundation.dart';
 
+import '../core/senha.dart';
 import 'api_client.dart';
 import 'dados_mock.dart';
 
 class UsuarioApp {
   final String nome;
   final String email;
-  const UsuarioApp({required this.nome, required this.email});
+
+  /// Endereço da foto de perfil no servidor (null = sem foto ou sem API).
+  final String? foto;
+  const UsuarioApp({required this.nome, required this.email, this.foto});
 
   /// Primeiro nome, para saudações.
   String get primeiroNome {
@@ -40,11 +44,6 @@ class AuthService extends ChangeNotifier {
   bool get logado => _atual != null;
 
   static final RegExp _padraoEmail = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
-  static const int tamanhoMinimoSenha = 4;
-
-  /// Com a API, o servidor exige 8 (veja backend/src/rotas/auth.js).
-  int get senhaMinima => _api.ativo ? 8 : tamanhoMinimoSenha;
-
   static bool emailValido(String email) => _padraoEmail.hasMatch(email.trim());
 
   Map<String, String>? _buscar(String email) {
@@ -57,19 +56,29 @@ class AuthService extends ChangeNotifier {
 
   /// Guarda o token e a pessoa que a API devolveu no login.
   void _aplicarLogin(Object? dados) {
-    if (dados is! Map)
+    if (dados is! Map) {
       throw const ErroApi(0, 'Resposta inesperada do servidor.');
+    }
     final token = dados['token'];
     final u = dados['usuario'];
     if (token is! String || u is! Map) {
       throw const ErroApi(0, 'Resposta inesperada do servidor.');
     }
     _api.token = token;
-    _api.iaNoServidor = dados['ia'] == true;
+    final foto = u['foto'];
     _atual = UsuarioApp(
       nome: (u['nome'] ?? '').toString(),
       email: (u['email'] ?? '').toString(),
+      foto: foto is String && foto.isNotEmpty ? foto : null,
     );
+    notifyListeners();
+  }
+
+  /// O FotoPerfilService chama depois de trocar ou remover a foto.
+  void atualizarFoto(String? foto) {
+    final u = _atual;
+    if (u == null) return;
+    _atual = UsuarioApp(nome: u.nome, email: u.email, foto: foto);
     notifyListeners();
   }
 
@@ -108,9 +117,8 @@ class AuthService extends ChangeNotifier {
   }) async {
     if (nome.trim().length < 2) return 'Informe seu nome completo.';
     if (!emailValido(email)) return 'Informe um e-mail válido.';
-    if (senha.length < senhaMinima) {
-      return 'A senha deve ter pelo menos $senhaMinima caracteres.';
-    }
+    final fraca = Senha.problema(senha);
+    if (fraca != null) return fraca;
     if (_api.ativo) {
       try {
         // Cria a conta; a pessoa entra em seguida, pela tela de login.
@@ -170,6 +178,7 @@ class AuthService extends ChangeNotifier {
         _atual = UsuarioApp(
           nome: u is Map ? (u['nome'] ?? nome.trim()).toString() : nome.trim(),
           email: atual.email,
+          foto: atual.foto,
         );
         notifyListeners();
         return null;
@@ -197,10 +206,9 @@ class AuthService extends ChangeNotifier {
   }) async {
     final u = _atual;
     if (u == null) return 'Você não está conectado.';
+    final fraca = Senha.problema(nova);
+    if (fraca != null) return fraca;
     if (_api.ativo) {
-      if (nova.length < senhaMinima) {
-        return 'A nova senha deve ter pelo menos $senhaMinima caracteres.';
-      }
       try {
         await _api.pedir(
           'POST',
@@ -215,10 +223,6 @@ class AuthService extends ChangeNotifier {
     final registro = _buscar(u.email);
     if (registro == null || registro['senha'] != atual) {
       return 'A senha atual está incorreta.';
-    }
-    if (nova.length < senhaMinima) {
-      return 'A nova senha deve ter pelo menos $senhaMinima '
-          'caracteres.';
     }
     registro['senha'] = nova;
     return null;

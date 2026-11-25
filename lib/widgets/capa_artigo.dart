@@ -28,7 +28,7 @@ class CapaArtigo extends StatelessWidget {
   Widget _reserva() => Container(
     color: Cores.verdeClaro,
     alignment: Alignment.center,
-    child: const Icon(Icons.image_outlined, color: Cores.verde),
+    child: Icon(Icons.image_outlined, color: Cores.verde),
   );
 
   @override

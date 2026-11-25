@@ -39,7 +39,12 @@ abstract class ConteudoRepositorio {
   Future<void> apagarArtigo(String id);
 
   Future<List<Comentario>> listarComentarios(String artigoId);
-  Future<void> salvarComentario(Comentario comentario);
+
+  /// [tituloArtigo] vai para o aviso de quem foi respondido (os artigos do
+  /// acervo moram no app, então o servidor não sabe o título deles).
+  Future<void> salvarComentario(Comentario comentario, {String? tituloArtigo});
+
+  /// Apaga o comentário E as respostas a ele.
   Future<void> apagarComentario(String artigoId, String comentarioId);
 
   Future<List<Comunidade>> listarComunidades();
@@ -131,7 +136,10 @@ class ConteudoLocal implements ConteudoRepositorio {
         ..sort((a, b) => a.criadoMs.compareTo(b.criadoMs));
 
   @override
-  Future<void> salvarComentario(Comentario comentario) async {
+  Future<void> salvarComentario(
+    Comentario comentario, {
+    String? tituloArtigo,
+  }) async {
     final lista =
         (await _todosComentarios()).where((c) => c.id != comentario.id).toList()
           ..add(comentario);
@@ -141,7 +149,11 @@ class ConteudoLocal implements ConteudoRepositorio {
   @override
   Future<void> apagarComentario(String artigoId, String comentarioId) async {
     final lista = (await _todosComentarios())
-        .where((c) => !(c.artigoId == artigoId && c.id == comentarioId))
+        .where(
+          (c) =>
+              !(c.artigoId == artigoId &&
+                  (c.id == comentarioId || c.respostaA == comentarioId)),
+        )
         .toList();
     await _gravarLista(_kComentarios, [for (final c in lista) c.toMap()]);
   }

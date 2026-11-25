@@ -1,6 +1,6 @@
 # Ikai API
 
-API em Node.js (Express 5) com MongoDB: login, sessões de uso, preferências, notificações, artigos, comunidades, mensagens e proxy do Gemini.
+API em Node.js (Express 5) com MongoDB: login, sessões de uso, preferências, notificações, artigos, comentários, comunidades e mensagens.
 
 - **Banco de dados:** [docs/BANCO_DE_DADOS.md](docs/BANCO_DE_DADOS.md) (diagrama, dicionário de dados, índices, rotas e exemplos).
 - **Rodar:** `npm install`, copiar `.env.example` para `.env`, `npm run db:init` e `npm start`.

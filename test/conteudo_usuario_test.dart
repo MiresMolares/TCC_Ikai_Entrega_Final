@@ -359,6 +359,36 @@ void main() {
       expect(await s.comentariosDe(artigo.id), isEmpty);
     });
 
+    test('responder fica em um nível só e sobrevive à leitura', () async {
+      final c = (await s.comentar('a001', 'Comentário principal.')).valor!;
+      usuario = (email: 'bia@ex.com', nome: 'Bia');
+      final r1 = (await s.comentar(
+        'a001',
+        'Respondendo.',
+        respostaA: c,
+      )).valor!;
+      expect(r1.respostaA, c.id);
+      final r2 = (await s.comentar('a001', 'E de novo.', respostaA: r1)).valor!;
+      expect(
+        r2.respostaA,
+        c.id,
+        reason: 'resposta a resposta vai para o principal',
+      );
+      final lista = await s.comentariosDe('a001');
+      expect(lista.where((x) => x.eResposta).length, 2);
+      expect(lista.first.respostaA, isNull);
+    });
+
+    test('apagar o comentário principal apaga as respostas', () async {
+      final c = (await s.comentar('a001', 'Comentário principal.')).valor!;
+      usuario = (email: 'bia@ex.com', nome: 'Bia');
+      await s.comentar('a001', 'Uma resposta.', respostaA: c);
+      usuario = (email: 'ana@ex.com', nome: 'Ana');
+      final artigo = ArtigosRepositorio.porId('a001')!;
+      expect(await s.apagarComentario(c, artigo), isTrue);
+      expect(await s.comentariosDe('a001'), isEmpty);
+    });
+
     test('apagar o artigo leva os comentários junto', () async {
       final artigo = (await publicar(s)).valor!;
       await s.comentar(artigo.id, 'Vai sumir junto.');

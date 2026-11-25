@@ -1,9 +1,9 @@
 import '../pages_configurar/controle_objetivo.dart';
 import 'auth_service.dart';
 import 'biblioteca_service.dart';
-import 'compromisso_service.dart';
 import 'conteudo_usuario.dart';
-import 'ik_ai_service.dart';
+import 'foto_perfil_service.dart';
+import 'notificacoes_service.dart';
 import 'progresso_service.dart';
 import 'tempo_diario.dart';
 
@@ -21,11 +21,11 @@ class SessaoUsuario {
     await Future.wait([
       BibliotecaService.instance.carregarPara(u.email),
       ProgressoService.instance.carregarPara(u.email),
-      IkAiService.carregarPara(u.email),
-      CompromissoService.instance.carregarPara(u.email),
       TempoDiarioService.instance.carregarPara(u.email),
       ConteudoUsuarioService.instance.carregar(),
+      FotoPerfilService.instance.carregarPara(u.email),
     ]);
+    NotificacoesService.instance.atualizar();
     // Se a pessoa já escolheu o que ver hoje, a escolha volta (vale só no
     // dia). O tempo usado hoje também volta: sair e entrar não zera a meta.
     await ControleObjetivos.instance.restaurarSelecao();
@@ -40,9 +40,9 @@ class SessaoUsuario {
     ControleObjetivos.instance.descartarHistoricoEmMemoria();
     BibliotecaService.instance.limpar();
     ProgressoService.instance.limpar();
-    IkAiService.limpar();
-    CompromissoService.instance.limpar();
     ConteudoUsuarioService.instance.limpar();
+    FotoPerfilService.instance.limpar();
+    NotificacoesService.instance.limpar();
     AuthService.instance.sair();
   }
 
@@ -56,8 +56,8 @@ class SessaoUsuario {
     ControleObjetivos.instance.descartarHistoricoEmMemoria();
     BibliotecaService.instance.limpar();
     ProgressoService.instance.limpar();
-    IkAiService.apagarDaConta(); // lê o e-mail antes da conta sair
-    CompromissoService.instance.apagarDaConta();
+    FotoPerfilService.instance.apagarDaConta();
+    NotificacoesService.instance.limpar();
     final email = AuthService.instance.usuarioAtual?.email;
     if (email != null) ConteudoUsuarioService.instance.apagarDaConta(email);
     return AuthService.instance.excluirConta();

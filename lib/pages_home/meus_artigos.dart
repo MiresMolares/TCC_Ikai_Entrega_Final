@@ -64,8 +64,8 @@ class MeusArtigosPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 if (meus.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 32),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
                     child: Text(
                       'Você ainda não escreveu nada. O que você sabe e '
                       'gostaria de contar a outras pessoas?',

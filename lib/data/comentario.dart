@@ -1,5 +1,5 @@
 /// Um comentário num artigo (do acervo do app ou escrito por um usuário).
-/// Dart puro.
+/// Pode ser uma resposta a outro comentário (um nível só). Dart puro.
 class Comentario {
   final String id;
   final String artigoId;
@@ -15,6 +15,12 @@ class Comentario {
   /// Milissegundos desde 1970.
   final int criadoMs;
 
+  /// Id do comentário principal que este responde (null = principal).
+  final String? respostaA;
+
+  /// Endereço da foto de quem comentou, no servidor (null = sem foto).
+  final String? foto;
+
   const Comentario({
     required this.id,
     required this.artigoId,
@@ -22,7 +28,11 @@ class Comentario {
     required this.autorEmail,
     required this.texto,
     required this.criadoMs,
+    this.respostaA,
+    this.foto,
   });
+
+  bool get eResposta => respostaA != null;
 
   Map<String, dynamic> toMap() => {
     'id': id,
@@ -31,6 +41,7 @@ class Comentario {
     'email': autorEmail,
     'texto': texto,
     'ms': criadoMs,
+    if (respostaA != null) 'resposta': respostaA,
   };
 
   /// Devolve null se o mapa estiver incompleto ou corrompido (nunca lança).
@@ -38,6 +49,7 @@ class Comentario {
     if (m is! Map) return null;
     final id = m['id'], artigo = m['artigo'], nome = m['nome'];
     final email = m['email'], texto = m['texto'], ms = m['ms'];
+    final resposta = m['resposta'], foto = m['foto'];
     if (id is! String || id.isEmpty) return null;
     if (artigo is! String || artigo.isEmpty) return null;
     if (nome is! String || email is! String) return null;
@@ -50,6 +62,8 @@ class Comentario {
       autorEmail: email,
       texto: texto,
       criadoMs: ms,
+      respostaA: resposta is String && resposta.isNotEmpty ? resposta : null,
+      foto: foto is String && foto.isNotEmpty ? foto : null,
     );
   }
 }

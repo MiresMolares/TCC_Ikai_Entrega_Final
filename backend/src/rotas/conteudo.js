@@ -8,6 +8,8 @@ import {
   conflito, naoEncontrado, proibido, ruim, ErroHttp,
 } from '../erros.js';
 import { dia, limpo, normalizar, removerEmojis } from '../texto.js';
+import { notificar } from './notificacoes.js';
+import { fotoUrl } from './perfil.js';
 
 const FORMATO_ID = /^[a-z][a-z0-9]{8,40}$/;
 
@@ -245,18 +247,30 @@ export function rotasConteudo({ db, config }) {
   /** Devolve o artigo do banco (ou {acervo: true}); 404 se não existe. */
   async function artigoDoComentario(id) {
     if (ID_ACERVO.test(id)) return { acervo: true };
-    const a = await db.artigos.findOne({ _id: id }, { projection: { autorId: 1 } });
+    const a = await db.artigos.findOne({ _id: id }, { projection: { autorId: 1, titulo: 1 } });
     if (!a) throw naoEncontrado('Artigo não encontrado.');
     return a;
   }
 
-  const comentarioSaida = (req, c) => ({
+  /** Endereço da foto de cada autor (só de quem tem foto). */
+  async function fotosDe(autorIds) {
+    const ids = [...new Map(autorIds.map((i) => [String(i), i])).values()];
+    if (!ids.length) return new Map();
+    const us = await db.usuarios
+      .find({ _id: { $in: ids }, fotoEm: { $exists: true } }, { projection: { fotoEm: 1 } })
+      .toArray();
+    return new Map(us.map((u) => [String(u._id), fotoUrl(u)]));
+  }
+
+  const comentarioSaida = (req, c, fotos) => ({
     id: c._id,
     artigo: c.artigoId,
     nome: c.autorNome,
     email: eMeu(req, c.autorId) ? req.usuario.email : '',
     texto: c.texto,
     ms: c.criadoEm.getTime(),
+    resposta: c.respostaA ?? null,
+    foto: fotos?.get(String(c.autorId)) ?? null,
   });
 
   r.get('/artigos/:id/comentarios', login, async (req, res) => {
@@ -266,11 +280,12 @@ export function rotasConteudo({ db, config }) {
       .sort({ criadoEm: 1 })
       .limit(300)
       .toArray();
-    res.json(lista.map((c) => comentarioSaida(req, c)));
+    const fotos = await fotosDe(lista.map((c) => c.autorId));
+    res.json(lista.map((c) => comentarioSaida(req, c, fotos)));
   });
 
   r.post('/artigos/:id/comentarios', login, async (req, res) => {
-    await artigoDoComentario(req.params.id);
+    const artigo = await artigoDoComentario(req.params.id);
     const texto = removerEmojis(req.body?.texto).replace(/[ \t]+/g, ' ').trim();
     if (texto.length < L.comentarioMin || texto.length > L.comentarioMax) {
       throw ruim(`O comentário precisa ter de ${L.comentarioMin} a ${L.comentarioMax} caracteres.`);
@@ -279,6 +294,18 @@ export function rotasConteudo({ db, config }) {
       db.comentarios, { autorId: req.usuario._id }, L.comentariosPorHora, 3600e3,
       'Você comentou demais nesta hora. Tente daqui a pouco.',
     );
+    // Resposta: só um nível. Responder a uma resposta vira resposta ao
+    // comentário principal (a conversa continua no mesmo lugar).
+    let pai = null;
+    const respostaA = req.body?.resposta;
+    if (respostaA !== undefined && respostaA !== null && respostaA !== '') {
+      if (typeof respostaA !== 'string') throw ruim('Comentário respondido inválido.');
+      pai = await db.comentarios.findOne({ _id: respostaA, artigoId: req.params.id });
+      if (!pai) throw naoEncontrado('O comentário que você quer responder não existe mais.');
+      if (pai.respostaA) {
+        pai = (await db.comentarios.findOne({ _id: pai.respostaA, artigoId: req.params.id })) ?? pai;
+      }
+    }
     const doc = {
       _id: escolherId(req.body?.id, 'k'),
       artigoId: req.params.id,
@@ -286,9 +313,38 @@ export function rotasConteudo({ db, config }) {
       autorNome: primeiroNome(req.usuario.nome),
       texto,
       criadoEm: new Date(),
+      ...(pai ? { respostaA: pai._id } : {}),
     };
     await db.comentarios.insertOne(doc).catch(criarId('Este comentário já existe.'));
-    res.status(201).json(comentarioSaida(req, doc));
+
+    // Avisa quem foi respondido e quem escreveu o artigo (nunca a si mesmo,
+    // nem duas vezes a mesma pessoa).
+    const titulo = artigo.acervo
+      ? limpo(req.body?.titulo ?? '').slice(0, 100) || 'um artigo'
+      : artigo.titulo;
+    const quem = doc.autorNome;
+    const trecho = texto.length > 120 ? `${texto.slice(0, 117)}...` : texto;
+    const avisados = new Set([String(req.usuario._id)]);
+    if (pai && !avisados.has(String(pai.autorId))) {
+      avisados.add(String(pai.autorId));
+      await notificar(db, pai.autorId, {
+        tipo: 'resposta',
+        titulo: `${quem} respondeu ao seu comentário`,
+        descricao: `Em "${titulo}": ${trecho}`,
+        artigoId: req.params.id,
+      });
+    }
+    if (!artigo.acervo && !avisados.has(String(artigo.autorId))) {
+      await notificar(db, artigo.autorId, {
+        tipo: 'comentario',
+        titulo: `${quem} comentou no seu artigo`,
+        descricao: `Em "${titulo}": ${trecho}`,
+        artigoId: req.params.id,
+      });
+    }
+
+    const fotos = await fotosDe([req.usuario._id]);
+    res.status(201).json(comentarioSaida(req, doc, fotos));
   });
 
   // Apaga quem comentou, ou quem escreveu o artigo (no próprio artigo).
@@ -298,7 +354,8 @@ export function rotasConteudo({ db, config }) {
     if (!c) throw naoEncontrado('Comentário não encontrado.');
     const donoDoArtigo = !a.acervo && eMeu(req, a.autorId);
     if (!eMeu(req, c.autorId) && !donoDoArtigo) throw proibido();
-    await db.comentarios.deleteOne({ _id: c._id });
+    // Apagar um comentário apaga também as respostas a ele.
+    await db.comentarios.deleteMany({ $or: [{ _id: c._id }, { respostaA: c._id }] });
     res.status(204).end();
   });
 

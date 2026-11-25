@@ -2,24 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../core/recursos.dart';
 import '../services/auth_service.dart';
 import '../services/tempo_diario.dart';
-import '../widgets/botao_ik_flutuante.dart';
 import '../widgets/estilo.dart';
-import '../widgets/navegador.dart';
-import '../pages_home/ik_ai_page.dart';
 import 'tela_fim_do_dia.dart';
 
 /// Fica ACIMA do Navigator (ver MaterialApp.builder em main.dart).
 ///
-/// Cuida de quatro coisas ligadas ao tempo do dia:
+/// Cuida de três coisas ligadas ao tempo do dia:
 ///  1. Conta o tempo só com o app à frente (pausa em segundo plano).
-///  2. Mostra os avisos da Ik AI (metade da meta, lembrete de foco) sem
-///     bloquear nada.
-///  3. Quando a meta acaba, troca o app pela conversa de fim de tempo
+///  2. Mostra os avisos (metade da meta, lembrete de foco) sem bloquear nada.
+///  3. Quando a meta acaba, troca o app pela tela de fim de tempo
 ///     ([TelaFimDoDia]); quando a pessoa encerra o dia, por [TelaEncerrado].
-///  4. Mantém o botão flutuante da Ik AI sempre à mão.
 ///
 /// Como está acima do Navigator, não há Overlay nem Navigator aqui: os
 /// widgets daqui só usam Material, nunca Tooltip, diálogo ou menu.
@@ -59,38 +53,23 @@ class _SessaoGuardState extends State<SessaoGuard> with WidgetsBindingObserver {
     }
   }
 
-  void _abrirIkAi() => abrirIkAi();
-
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([
-        _t,
-        AuthService.instance,
-        NavegadorIk.observador.botaoPermitido,
-      ]),
+      listenable: Listenable.merge([_t, AuthService.instance]),
       builder: (context, _) {
         if (AuthService.instance.logado) {
           // O Navigator sai da árvore: nenhuma tela, diálogo ou menu aberto
           // sobrevive ao fim do tempo, e ele volta do zero depois.
           if (_t.fase == FaseDoDia.fimDeTempo) {
-            NavegadorIk.observador.reiniciar();
             return const TelaFimDoDia();
           }
           if (_t.fase == FaseDoDia.encerrado) {
-            NavegadorIk.observador.reiniciar();
             return const TelaEncerrado();
           }
         }
 
         final logado = AuthService.instance.logado;
-        final tecladoAberto = MediaQuery.of(context).viewInsets.bottom > 0;
-        final mostrarBotao =
-            conversaLivreIkAi &&
-            logado &&
-            _t.metaDefinida &&
-            NavegadorIk.observador.botaoPermitido.value &&
-            !tecladoAberto;
         final aviso = logado ? _t.aviso : null;
 
         return Stack(
@@ -101,14 +80,11 @@ class _SessaoGuardState extends State<SessaoGuard> with WidgetsBindingObserver {
                 top: 0,
                 left: 0,
                 right: 0,
-                child: _BannerIk(
+                child: _BannerAviso(
                   key: ValueKey('${aviso.tipo}-${aviso.texto}'),
                   aviso: aviso,
-                  aoConversar: _abrirIkAi,
                 ),
               ),
-            if (mostrarBotao)
-              Positioned.fill(child: BotaoIkFlutuante(aoTocar: _abrirIkAi)),
           ],
         );
       },
@@ -116,19 +92,18 @@ class _SessaoGuardState extends State<SessaoGuard> with WidgetsBindingObserver {
   }
 }
 
-/// Aviso da Ik AI no topo da tela: some sozinho depois de alguns segundos,
-/// e a pessoa pode dispensar ou conversar. Nunca bloqueia o app.
-class _BannerIk extends StatefulWidget {
-  final AvisoIk aviso;
-  final VoidCallback aoConversar;
+/// Aviso de tempo no topo da tela: some sozinho depois de alguns segundos,
+/// e a pessoa pode dispensar. Nunca bloqueia o app.
+class _BannerAviso extends StatefulWidget {
+  final AvisoTempo aviso;
 
-  const _BannerIk({super.key, required this.aviso, required this.aoConversar});
+  const _BannerAviso({super.key, required this.aviso});
 
   @override
-  State<_BannerIk> createState() => _BannerIkState();
+  State<_BannerAviso> createState() => _BannerAvisoState();
 }
 
-class _BannerIkState extends State<_BannerIk> {
+class _BannerAvisoState extends State<_BannerAviso> {
   Timer? _timer;
 
   @override
@@ -152,7 +127,7 @@ class _BannerIkState extends State<_BannerIk> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
         child: Material(
-          color: Cores.tituloVerde,
+          color: Cores.faixaAviso,
           elevation: 8,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
@@ -163,7 +138,7 @@ class _BannerIkState extends State<_BannerIk> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.auto_awesome, color: Colors.white),
+                    const Icon(Icons.schedule, color: Colors.white),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -180,17 +155,6 @@ class _BannerIkState extends State<_BannerIk> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if (conversaLivreIkAi)
-                      TextButton(
-                        onPressed: () {
-                          _dispensar();
-                          widget.aoConversar();
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text('Falar com a Ik AI'),
-                      ),
                     TextButton(
                       onPressed: _dispensar,
                       style: TextButton.styleFrom(

@@ -95,15 +95,13 @@ Chrome ou Edge.
    - `C:\Ikai\TCC-Entrega-final\env.json` — o endereço do servidor. Conteúdo:
      ```json
      {
-       "API_URL": "http://localhost:3100",
-       "GEMINI_API_KEY": "",
-       "GEMINI_MODEL": "gemini-3.6-flash"
+       "API_URL": "http://localhost:3100"
      }
      ```
-   - `C:\Ikai\TCC-Entrega-final\backend\.env` — a conexão com o banco. Tem 7
+   - `C:\Ikai\TCC-Entrega-final\backend\.env` — a conexão com o banco. Tem estas
      linhas: `PORT=3100`, `MONGODB_URI=...`, `MONGODB_DB=ikai_app`,
-     `JWT_SECRET=...`, `GEMINI_API_KEY=` (vazio), `GEMINI_MODEL=gemini-3.6-flash`
-     e `CORS_ORIGEM=*`.
+     `JWT_SECRET=...` e `CORS_ORIGEM=*` (as linhas `GEMINI_*` antigas
+     podem ficar ou sair: o servidor não usa mais).
 3. **O `.env` tem a senha do banco: mande em particular**, nunca em grupo nem
    no GitHub.
 4. Se criou um usuário do banco para o amigo (passo 1.2): no `.env` **dele**,

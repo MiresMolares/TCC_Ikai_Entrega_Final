@@ -1,7 +1,7 @@
 {
   "name": "ikai-api",
   "version": "1.0.0",
-  "description": "API do Ikai (Node.js + Express + MongoDB): login, sessões, preferências, notificações, artigos, comunidades, mensagens e proxy do Gemini.",
+  "description": "API do Ikai (Node.js + Express + MongoDB): login, sessões, preferências, notificações, artigos, comentários, comunidades e mensagens.",
   "private": true,
   "type": "module",
   "engines": {

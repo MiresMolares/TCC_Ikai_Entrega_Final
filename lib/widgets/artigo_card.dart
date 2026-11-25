@@ -35,7 +35,7 @@ class ArtigoCard extends StatelessWidget {
         final miniatura = !destaque && artigo.temCapa;
 
         return Material(
-          color: Colors.white,
+          color: Cores.cartao,
           borderRadius: BorderRadius.circular(16),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
@@ -65,7 +65,7 @@ class ArtigoCard extends StatelessWidget {
                             children: [
                               Text(
                                 artigo.titulo,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: Cores.titulo,
@@ -75,7 +75,7 @@ class ArtigoCard extends StatelessWidget {
                               Text(
                                 '${artigo.doUsuario ? '${artigo.autor} (leitor)' : artigo.autor}  ·  ${artigo.minutosLeitura} min  ·  ${Artigo.nomeDoNivel(artigo.nivel)}'
                                 '${lido ? '  ·  Lido' : ''}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   color: Cores.subtitulo,
                                 ),
@@ -85,7 +85,7 @@ class ArtigoCard extends StatelessWidget {
                                 artigo.resumo,
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   height: 1.4,
                                   color: Cores.titulo,
@@ -108,7 +108,7 @@ class ArtigoCard extends StatelessWidget {
                                       ),
                                       child: Text(
                                         t,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 11,
                                           color: Cores.verde,
                                         ),

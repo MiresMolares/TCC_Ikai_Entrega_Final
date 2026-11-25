@@ -36,7 +36,9 @@ Tipos do MongoDB. **Obr.** = obrigatório.
 | `nome` | string | sim | 2 a 80 caracteres. |
 | `email` | string | sim | Formato de e-mail, até 120 caracteres, **único**. |
 | `senhaHash` | string | sim | Hash bcrypt. A senha nunca é guardada. |
-| `fotoUrl` | string ou nulo | não | Até 300 caracteres. |
+| `fotoUrl` | string ou nulo | não | Até 300 caracteres (antigo, não usado). |
+| `foto` | objeto | não | Foto de perfil: `tipo` (JPEG, PNG ou WebP) e `dados` (binário, até 300 KB). Servida em `GET /usuarios/:id/foto`. |
+| `fotoEm` | date | não | Quando a foto foi trocada (muda o endereço da foto, para não vir do cache). |
 | `criadoEm` | date | sim | |
 
 ### `objetivos`
@@ -94,14 +96,15 @@ Quem nunca mexeu nas configurações não tem documento: a API devolve os padrõ
 |---|---|---|---|
 | `_id` | ObjectId | sim | Chave primária. |
 | `usuarioId` | ObjectId | sim | Aponta para `usuarios._id`. |
-| `tipo` | string | sim | `lembrete`, `conquista`, `comunidade` ou `sistema`. |
+| `tipo` | string | sim | `lembrete`, `conquista`, `comunidade`, `sistema`, ou (criadas pelo servidor) `comentario` e `resposta`. |
 | `titulo` | string | sim | 1 a 80 caracteres. |
 | `descricao` | string | sim | Até 300 caracteres (pode ser vazia). |
 | `criadaEm` | date | sim | Some sozinha depois de 90 dias. |
 | `lida` | bool | sim | |
+| `artigoId` | string | não | Artigo comentado (notificações `comentario` e `resposta`). |
 
 ### `artigos`, `comunidades` e `posts`
-Conteúdo dos usuários (já existiam). Campos principais: `artigos` (`_id`, `autorId`, `autorNome`, `objetivo`, `categoria`, `nivel` 1 a 3, `titulo` 5 a 100, `resumo` 10 a 200, `tags` até 5, `paragrafos`, `criadoEm`); `comunidades` (`_id`, `criadorId`, `nome` 3 a 40, `nomeChave` único, `descricao` 10 a 140, `icone`, `categorias` até 5, `regras` até 6, `criadoEm`); `posts` (`_id`, `comunidadeId`, `autorId`, `autorNome`, `texto` 3 a 500, `criadoEm`).
+Conteúdo dos usuários (já existiam). Campos principais: `artigos` (`_id`, `autorId`, `autorNome`, `objetivo`, `categoria`, `nivel` 1 a 3, `titulo` 5 a 100, `resumo` 10 a 200, `tags` até 5, `paragrafos`, `criadoEm`); `comunidades` (`_id`, `criadorId`, `nome` 3 a 40, `nomeChave` único, `descricao` 10 a 140, `icone`, `categorias` até 5, `regras` até 6, `criadoEm`); `posts` (`_id`, `comunidadeId`, `autorId`, `autorNome`, `texto` 3 a 500, `criadoEm`); `comentarios` (`_id`, `artigoId`, `autorId`, `autorNome`, `texto` 2 a 500, `respostaA` opcional: id do comentário principal que este responde, `criadoEm`).
 
 ## 3. Índices
 
@@ -430,6 +433,6 @@ db.sessoes.getIndexes()
 ## 8. O que ainda não está pronto
 
 - **O aplicativo ainda não consome estas rotas.** Hoje ele guarda a última sessão, as preferências e as notificações no aparelho (`shared_preferences` e memória). O próximo passo é trocar essas leituras e gravações por chamadas à API, com o aparelho como reserva sem rede.
-- Biblioteca pessoal (pastas), uso diário e combinados com a Ik AI continuam só no aparelho, de propósito (privacidade). Se a equipe quiser sincronizar, viram novas coleções.
+- Biblioteca pessoal (pastas) e uso diário continuam só no aparelho, de propósito (privacidade). Se a equipe quiser sincronizar, viram novas coleções.
 - `fotoUrl` existe no esquema, mas ainda não há rota para enviar foto.
 - Não há rotina de backup nem monitoramento. Em produção, use um MongoDB gerenciado (por exemplo, Atlas) com backup ligado.

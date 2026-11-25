@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../pages_home/home.dart';
 import '../services/artigos_repositorio.dart' show conteudosPorSessao;
-import '../services/gemini_service.dart';
 import '../services/tempo_diario.dart';
-import '../widgets/cartao_checkin.dart';
 import '../widgets/cartao_uso_semanal.dart';
 import '../widgets/estilo.dart';
 import 'controle_objetivo.dart';
@@ -47,14 +45,14 @@ class OpcaoCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: selecionado ? const Color(0xFFE4EFE5) : Colors.white,
+          color: selecionado ? Cores.selecao : Cores.cartao,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: selecionado
                 ? Cores.laranja
                 : mostrarSugestao
-                ? const Color(0xFF8FA3B5)
-                : const Color(0xFFE0E5DF),
+                ? Cores.bordaSelecao
+                : Cores.bordaNeutra,
             width: (selecionado || mostrarSugestao) ? 2 : 1,
           ),
         ),
@@ -64,9 +62,7 @@ class OpcaoCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: selecionado
-                    ? const Color(0xFFD0E3D2)
-                    : const Color(0xFFF0F3EE),
+                color: selecionado ? Cores.iconeSelecao : Cores.iconeFundo,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icone, color: Cores.laranja, size: 26),
@@ -78,7 +74,7 @@ class OpcaoCard extends StatelessWidget {
                 children: [
                   Text(
                     titulo,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: Cores.tituloVerde,
@@ -88,7 +84,7 @@ class OpcaoCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       descricao,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12.5,
                         height: 1.3,
                         color: Cores.subtitulo,
@@ -106,15 +102,15 @@ class OpcaoCard extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEDF1F3),
+                  color: Cores.chipFundo,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text(
+                child: Text(
                   'Sugestão',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF4F6275),
+                    color: Cores.cinzaAzul,
                   ),
                 ),
               ),
@@ -159,14 +155,14 @@ class CategoriaQuadrada extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            color: selecionada ? const Color(0xFFE4EFE5) : Colors.white,
+            color: selecionada ? Cores.selecao : Cores.cartao,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: selecionada
                   ? Cores.laranja
                   : mostrarSugestao
-                  ? const Color(0xFF8FA3B5)
-                  : const Color(0xFFE0E5DF),
+                  ? Cores.bordaSelecao
+                  : Cores.bordaNeutra,
               width: (selecionada || mostrarSugestao) ? 2 : 1,
             ),
           ),
@@ -183,8 +179,8 @@ class CategoriaQuadrada extends StatelessWidget {
                         height: 68,
                         decoration: BoxDecoration(
                           color: selecionada
-                              ? const Color(0xFFD0E3D2)
-                              : const Color(0xFFF0F3EE),
+                              ? Cores.iconeSelecao
+                              : Cores.iconeFundo,
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: Icon(
@@ -199,7 +195,7 @@ class CategoriaQuadrada extends StatelessWidget {
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: Cores.tituloVerde,
@@ -228,15 +224,15 @@ class CategoriaQuadrada extends StatelessWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEDF1F3),
+                      color: Cores.chipFundo,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Sugestão',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF4F6275),
+                        color: Cores.cinzaAzul,
                       ),
                     ),
                   ),
@@ -325,8 +321,6 @@ class _FluxoObjetivosPageState extends State<FluxoObjetivosPage> {
         return c.sugestaoCategoriaIds.isNotEmpty;
       case EtapaFluxo.foco:
         return c.sugestaoFoco != null;
-      case EtapaFluxo.ikai:
-        return c.sugestaoTexto != null;
     }
   }
 
@@ -338,19 +332,13 @@ class _FluxoObjetivosPageState extends State<FluxoObjetivosPage> {
         return 'O que você quer ver?';
       case EtapaFluxo.foco:
         return 'Quer um lembrete de foco?';
-      case EtapaFluxo.ikai:
-        return 'Quer contar algo à Ik AI?';
     }
   }
 
   String get _subtitulo {
     switch (c.etapaAtual) {
-      case EtapaFluxo.ikai:
-        return 'É opcional. Quando o seu tempo do dia acabar, a Ik AI usa só '
-            'o que você escrever aqui para sugerir no que investir sua '
-            'energia.';
       case EtapaFluxo.foco:
-        return 'É opcional e não bloqueia nada: a Ik AI só avisa quando esse '
+        return 'É opcional e não bloqueia nada: o Ikai só avisa quando esse '
             'tempo passar, para você decidir se faz uma pausa.';
       case EtapaFluxo.categorias:
         return c.objetivos.length > 1
@@ -373,7 +361,7 @@ class _FluxoObjetivosPageState extends State<FluxoObjetivosPage> {
       children: [
         Text(
           _titulo,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
             color: Cores.tituloVerde,
@@ -382,7 +370,7 @@ class _FluxoObjetivosPageState extends State<FluxoObjetivosPage> {
         const SizedBox(height: 8),
         Text(
           _subtitulo,
-          style: const TextStyle(fontSize: 15, color: Cores.subtitulo),
+          style: TextStyle(fontSize: 15, color: Cores.subtitulo),
         ),
         const SizedBox(height: 20),
       ],
@@ -395,7 +383,7 @@ class _FluxoObjetivosPageState extends State<FluxoObjetivosPage> {
       listenable: c,
       builder: (context, _) {
         if (!c.historicoCarregado) {
-          return const Scaffold(
+          return Scaffold(
             backgroundColor: Cores.fundoEtapas,
             body: Center(
               child: CircularProgressIndicator(color: Cores.laranja),
@@ -421,7 +409,7 @@ class _FluxoObjetivosPageState extends State<FluxoObjetivosPage> {
                         horizontal: 8,
                         vertical: 2,
                       ),
-                      color: const Color(0xFFEDF1F3),
+                      color: Cores.chipFundo,
                       child: Text(
                         'Etapa ${c.etapa + 1} de ${c.etapas.length}',
                         style: const TextStyle(fontSize: 14),
@@ -449,14 +437,13 @@ class _FluxoObjetivosPageState extends State<FluxoObjetivosPage> {
         // quem já usa de forma recorrente, os dados de uso.
         return ListView(
           children: [
-            const CartaoCheckIn(),
             const CartaoUsoSemanal(),
             _cabecalho(),
             for (final o in lista) ...[
               // "Passar o tempo" é sozinho: fica separado dos outros.
               if (o.livre) ...[
-                const Padding(
-                  padding: EdgeInsets.only(top: 4, bottom: 8),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, bottom: 8),
                   child: Text(
                     'Ou, sem preferências:',
                     style: TextStyle(
@@ -502,7 +489,7 @@ class _FluxoObjetivosPageState extends State<FluxoObjetivosPage> {
                         ? 'Nenhuma categoria escolhida'
                         : '${c.categorias.length} de '
                               '${ControleObjetivos.maxCategorias} escolhidas',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Cores.subtitulo,
@@ -525,7 +512,7 @@ class _FluxoObjetivosPageState extends State<FluxoObjetivosPage> {
                 child: Text(
                   'Falta escolher em: '
                   '${c.objetivosSemCategoria.map((o) => o.titulo).join(' e ')}',
-                  style: const TextStyle(fontSize: 13, color: Cores.laranja),
+                  style: TextStyle(fontSize: 13, color: Cores.laranja),
                 ),
               ),
             const SizedBox(height: 8),
@@ -551,8 +538,6 @@ class _FluxoObjetivosPageState extends State<FluxoObjetivosPage> {
         );
       case EtapaFluxo.foco:
         return ListView(children: [_cabecalho(), const _PassoFoco()]);
-      case EtapaFluxo.ikai:
-        return ListView(children: [_cabecalho(), const _PassoIkAi()]);
     }
   }
 
@@ -566,12 +551,12 @@ class _FluxoObjetivosPageState extends State<FluxoObjetivosPage> {
             child: OutlinedButton(
               onPressed: c.voltar,
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFFE0E5DF)),
+                side: BorderSide(color: Cores.bordaNeutra),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: const Icon(Icons.arrow_back, color: Cores.tituloVerde),
+              child: Icon(Icons.arrow_back, color: Cores.tituloVerde),
             ),
           ),
           const SizedBox(width: 10),
@@ -592,7 +577,7 @@ class _FluxoObjetivosPageState extends State<FluxoObjetivosPage> {
                   : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Cores.laranja,
-                disabledBackgroundColor: const Color(0xFFCAD5CA),
+                disabledBackgroundColor: Cores.desativado,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -636,14 +621,14 @@ class _PassoFoco extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Cores.cartao,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE0E5DF)),
+              border: Border.all(color: Cores.bordaNeutra),
             ),
             child: Text(
               'Sua meta de hoje é $meta min no Ikai. O lembrete abaixo é '
               'só dentro dela.',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 height: 1.4,
                 color: Cores.tituloVerde,
@@ -658,14 +643,14 @@ class _PassoFoco extends StatelessWidget {
               ChoiceChip(
                 label: const Text('Sem lembrete'),
                 selected: c.focoMin == 0,
-                selectedColor: const Color(0xFFE4EFE5),
+                selectedColor: Cores.selecao,
                 onSelected: (_) => c.definirFoco(0),
               ),
               for (final m in ControleObjetivos.opcoesFoco)
                 ChoiceChip(
                   label: Text('$m min'),
                   selected: c.focoMin == m,
-                  selectedColor: const Color(0xFFE4EFE5),
+                  selectedColor: Cores.selecao,
                   onSelected: (_) => c.definirFoco(m),
                 ),
             ],
@@ -682,19 +667,19 @@ class _PassoFoco extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF8FA3B5), width: 2),
+                  border: Border.all(color: Cores.bordaSelecao, width: 2),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.history, color: Color(0xFF4F6275)),
+                    Icon(Icons.history, color: Cores.cinzaAzul),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         'Sugestão: $sugestao min (toque para usar)',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF4F6275),
+                          color: Cores.cinzaAzul,
                         ),
                       ),
                     ),
@@ -705,192 +690,6 @@ class _PassoFoco extends StatelessWidget {
           ],
         ],
       ),
-    );
-  }
-}
-
-// =====================================================
-// ETAPA (AVANÇADO): IK AI (OPCIONAL)
-// =====================================================
-
-class _PassoIkAi extends StatefulWidget {
-  const _PassoIkAi();
-
-  @override
-  State<_PassoIkAi> createState() => _PassoIkAiState();
-}
-
-class _PassoIkAiState extends State<_PassoIkAi> {
-  final ControleObjetivos c = ControleObjetivos.instance;
-  late final TextEditingController _texto = TextEditingController(
-    text: c.textoIkAi,
-  );
-
-  static const List<String> _exemplos = [
-    'lendo um livro',
-    'treinando em casa',
-    'aprendendo um idioma',
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    c.addListener(_sincronizar);
-  }
-
-  @override
-  void dispose() {
-    c.removeListener(_sincronizar);
-    _texto.dispose();
-    super.dispose();
-  }
-
-  /// Mantém o campo igual ao controlador (ex.: ao tocar na sugestão).
-  void _sincronizar() {
-    if (_texto.text == c.textoIkAi) return;
-    _texto.value = TextEditingValue(
-      text: c.textoIkAi,
-      selection: TextSelection.collapsed(offset: c.textoIkAi.length),
-    );
-  }
-
-  void _anexar(String frase) {
-    final atual = c.textoIkAi.trim();
-    c.definirTextoIkAi(atual.isEmpty ? frase : '$atual, $frase');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: c,
-      builder: (context, _) {
-        final temTexto = c.textoIkAi.trim().isNotEmpty;
-        final geminiPronto = GeminiService.padrao.configurado;
-        final sugestao = c.sugestaoTexto;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _texto,
-              maxLength: ControleObjetivos.limiteTextoIkAi,
-              minLines: 3,
-              maxLines: 5,
-              textCapitalization: TextCapitalization.sentences,
-              onChanged: c.definirTextoIkAi,
-              decoration: InputDecoration(
-                hintText:
-                    'Ex.: estou lendo Capitães da Areia, treinando '
-                    'em casa e aprendendo francês',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: Color(0xFFE0E5DF)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: Color(0xFFE0E5DF)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(
-                    color: Cores.laranja,
-                    width: 1.5,
-                  ),
-                ),
-              ),
-            ),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                for (final e in _exemplos)
-                  ActionChip(label: Text(e), onPressed: () => _anexar(e)),
-              ],
-            ),
-            if (sugestao != null && sugestao != c.textoIkAi.trim()) ...[
-              const SizedBox(height: 12),
-              InkWell(
-                onTap: c.aplicarSugestaoTexto,
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFF8FA3B5),
-                      width: 2,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.history, color: Color(0xFF4F6275)),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Sugestão: "$sugestao" (toque para usar)',
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF4F6275),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-            const SizedBox(height: 12),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE0E5DF)),
-              ),
-              child: SwitchListTile(
-                value: c.permitirGemini,
-                onChanged: (temTexto && geminiPronto)
-                    ? c.definirPermissaoGemini
-                    : null,
-                activeTrackColor: Cores.verde,
-                title: const Text(
-                  'Usar o Gemini (Google) nas sugestões',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Cores.tituloVerde,
-                  ),
-                ),
-                subtitle: Text(
-                  geminiPronto
-                      ? 'Só quando o seu tempo do dia acabar, o texto '
-                            'acima, o modo e as categorias são enviados ao '
-                            'Gemini. Seu nome e e-mail nunca são enviados. '
-                            'Desligado, as sugestões são geradas no seu '
-                            'aparelho.'
-                      : 'O Gemini ainda não está ativo neste aplicativo '
-                            '(falta a chave de acesso). Por enquanto, as '
-                            'sugestões são geradas no seu aparelho.',
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'A Ik AI não deduz nada sobre você: ela usa exatamente o '
-              'que você escrever.',
-              style: TextStyle(fontSize: 12, color: Cores.subtitulo),
-            ),
-          ],
-        );
-      },
     );
   }
 }

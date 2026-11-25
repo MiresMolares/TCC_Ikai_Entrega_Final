@@ -106,12 +106,10 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _loginSocial() => mostrarAviso(context, avisoLoginSocial);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: fundoLogin,
+      backgroundColor: Cores.fundoLogin,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -200,20 +198,6 @@ class _LoginPageState extends State<LoginPage> {
               BotaoPrincipal(
                 texto: 'Entrar',
                 onPressed: _entrando ? null : entrar,
-              ),
-              const SizedBox(height: 10),
-              const DivisorOu(),
-              const SizedBox(height: 10),
-              BotaoSocial(
-                texto: 'Continuar com Google',
-                imagem: 'assets/logo_google.png',
-                onPressed: _loginSocial,
-              ),
-              const SizedBox(height: 10),
-              BotaoSocial(
-                texto: 'Continuar com Facebook',
-                imagem: 'assets/logo_facebook.png',
-                onPressed: _loginSocial,
               ),
               const SizedBox(height: 40),
               Row(

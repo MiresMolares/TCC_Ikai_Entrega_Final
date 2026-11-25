@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../core/uso_diario.dart';
-import '../services/acoes_fim_do_dia.dart';
-import '../services/chat_fabrica.dart';
-import '../services/chat_ik_ai.dart';
 import '../services/tempo_diario.dart';
 import '../widgets/estilo.dart';
-import '../widgets/ik_ai_chat_view.dart';
 
-/// O tempo do dia acabou (ou a pessoa pediu para encerrar): a Ik AI abre uma
-/// conversa. Lá a pessoa conta o que aprendeu, justifica mais um pouco de
-/// tempo (no máximo duas vezes por dia, e fica registrado) ou encerra o dia.
+/// O tempo do dia acabou (ou a pessoa pediu para encerrar). Aqui ela pode
+/// contar o que aprendeu, pedir mais um pouco de tempo explicando por quê
+/// (no máximo duas vezes por dia, e fica registrado) ou encerrar o dia.
 ///
 /// Fica ACIMA do Navigator (veja SessaoGuard): tem o próprio Overlay, que o
 /// campo de texto exige, e não abre diálogos nem menus.
@@ -22,24 +18,80 @@ class TelaFimDoDia extends StatefulWidget {
 }
 
 class _TelaFimDoDiaState extends State<TelaFimDoDia> {
-  late final ChatIkAi _chat;
   final _t = TempoDiarioService.instance;
-
-  @override
-  void initState() {
-    super.initState();
-    _chat = novoChatIkAi(
-      ocasiao: 'fim',
-      minutosUsados: (_t.usadoHojeSeg / 60).round(),
-      fimDoDia: AcoesFimDoDiaReais(_t),
-    );
-  }
+  final _aprendi = TextEditingController();
+  final _motivo = TextEditingController();
+  int _minutos = TempoDiarioService.opcoesProrrogacao.first;
+  bool _guardou = false;
+  String? _erroMotivo;
 
   @override
   void dispose() {
-    _chat.dispose();
+    _aprendi.dispose();
+    _motivo.dispose();
     super.dispose();
   }
+
+  void _guardarAprendizado() {
+    if (_t.registrarAprendizado(_aprendi.text)) {
+      setState(() {
+        _guardou = true;
+        _aprendi.clear();
+      });
+    }
+  }
+
+  void _continuar() {
+    if (!_t.prorrogar(_minutos, _motivo.text)) {
+      setState(
+        () => _erroMotivo = 'Conte em poucas palavras por que quer continuar.',
+      );
+    }
+  }
+
+  InputDecoration _decoracao(String dica, {String? erro}) => InputDecoration(
+    hintText: dica,
+    errorText: erro,
+    filled: true,
+    fillColor: Cores.cartao,
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+  );
+
+  Widget _cartao({required String titulo, required List<Widget> filhos}) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Cores.cartao,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Cores.bordaQuente),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            titulo,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Cores.tituloVerde,
+            ),
+          ),
+          const SizedBox(height: 10),
+          ...filhos,
+        ],
+      ),
+    );
+  }
+
+  /// Os dois caminhos têm o mesmo peso visual: nenhum é empurrado.
+  ButtonStyle get _estiloNeutro => OutlinedButton.styleFrom(
+    foregroundColor: Cores.tituloVerde,
+    side: BorderSide(color: Cores.subtitulo),
+    minimumSize: const Size.fromHeight(50),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -51,47 +103,155 @@ class _TelaFimDoDiaState extends State<TelaFimDoDia> {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 560),
-              child: Column(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.hourglass_bottom_rounded,
-                          size: 36,
-                          color: Cores.laranja,
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.hourglass_bottom_rounded,
+                        size: 36,
+                        color: Cores.laranja,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              voluntario
+                                  ? 'Encerrar por hoje?'
+                                  : 'Seu tempo de hoje acabou',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Cores.tituloVerde,
+                              ),
+                            ),
+                            Text(
+                              'Você usou ${formatarHm(_t.usadoHojeSeg)} de '
+                              '${formatarHm(_t.limiteHojeSeg)} hoje.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Cores.subtitulo,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  _cartao(
+                    titulo: 'O que você aprendeu hoje?',
+                    filhos: [
+                      TextField(
+                        controller: _aprendi,
+                        minLines: 2,
+                        maxLines: 4,
+                        maxLength: TempoDiarioService.limiteTexto,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: _decoracao('É opcional. Uma frase basta.'),
+                      ),
+                      Row(
+                        children: [
+                          TextButton(
+                            onPressed: _guardarAprendizado,
+                            child: const Text('Guardar'),
+                          ),
+                          if (_guardou)
+                            Text(
+                              'Guardado no seu dia.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Cores.verde,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  if (!voluntario)
+                    _cartao(
+                      titulo: 'Precisa de mais um pouco?',
+                      filhos: _t.podeProrrogar
+                          ? [
                               Text(
-                                voluntario
-                                    ? 'Encerrar por hoje?'
-                                    : 'Seu tempo de hoje acabou',
-                                style: const TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Cores.tituloVerde,
+                                'Explique por quê. Você pode pedir mais '
+                                '${_t.prorrogacoesRestantes} de '
+                                '${TempoDiarioService.maxProrrogacoes} '
+                                'vezes hoje, e o motivo fica registrado.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  height: 1.4,
+                                  color: Cores.subtitulo,
                                 ),
                               ),
+                              const SizedBox(height: 10),
+                              Wrap(
+                                spacing: 8,
+                                children: [
+                                  for (final m
+                                      in TempoDiarioService.opcoesProrrogacao)
+                                    ChoiceChip(
+                                      label: Text('$m min'),
+                                      selected: _minutos == m,
+                                      onSelected: (_) =>
+                                          setState(() => _minutos = m),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              TextField(
+                                controller: _motivo,
+                                maxLength: TempoDiarioService.limiteTexto,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
+                                onChanged: (_) {
+                                  if (_erroMotivo != null) {
+                                    setState(() => _erroMotivo = null);
+                                  }
+                                },
+                                decoration: _decoracao(
+                                  'Quero continuar porque...',
+                                  erro: _erroMotivo,
+                                ),
+                              ),
+                              OutlinedButton(
+                                onPressed: _continuar,
+                                style: _estiloNeutro,
+                                child: Text('Continuar mais $_minutos min'),
+                              ),
+                            ]
+                          : [
                               Text(
-                                'Você usou ${formatarHm(_t.usadoHojeSeg)} de '
-                                '${formatarHm(_t.limiteHojeSeg)} hoje.',
-                                style: const TextStyle(
+                                'Você já usou os pedidos de tempo extra de '
+                                'hoje. Amanhã tem mais.',
+                                style: TextStyle(
                                   fontSize: 13,
                                   color: Cores.subtitulo,
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-                      ],
                     ),
+                  if (voluntario) ...[
+                    OutlinedButton(
+                      onPressed: _t.voltarAoApp,
+                      style: _estiloNeutro,
+                      child: const Text('Voltar ao app'),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  OutlinedButton(
+                    onPressed: () {
+                      if (_aprendi.text.trim().isNotEmpty) {
+                        _t.registrarAprendizado(_aprendi.text);
+                      }
+                      _t.encerrarPorHoje();
+                    },
+                    style: _estiloNeutro,
+                    child: const Text('Encerrar por hoje'),
                   ),
-                  Expanded(child: IkAiChatView(chat: _chat)),
                 ],
               ),
             ),
@@ -129,13 +289,13 @@ class TelaEncerrado extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.nights_stay_outlined,
                       size: 48,
                       color: Cores.laranja,
                     ),
                     const SizedBox(height: 16),
-                    const Text(
+                    Text(
                       'Por hoje é só',
                       style: TextStyle(
                         fontSize: 28,
@@ -148,7 +308,7 @@ class TelaEncerrado extends StatelessWidget {
                       'Você usou ${formatarHm(t.usadoHojeSeg)} hoje. '
                       'Amanhã o Ikai estará aqui, com a sua meta de '
                       '${t.metaMin} min.',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         height: 1.4,
                         color: Cores.subtitulo,
@@ -156,7 +316,7 @@ class TelaEncerrado extends StatelessWidget {
                     ),
                     if (aprendi.isNotEmpty) ...[
                       const SizedBox(height: 20),
-                      const Text(
+                      Text(
                         'O que você contou que aprendeu hoje',
                         style: TextStyle(
                           fontSize: 13,
@@ -170,7 +330,7 @@ class TelaEncerrado extends StatelessWidget {
                           padding: const EdgeInsets.only(bottom: 4),
                           child: Text(
                             '"$a"',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               height: 1.4,
                               color: Cores.tituloVerde,
@@ -179,7 +339,7 @@ class TelaEncerrado extends StatelessWidget {
                         ),
                     ],
                     const SizedBox(height: 24),
-                    const Text(
+                    Text(
                       'Você pode fechar o app. Descansar a tela também é '
                       'parte do método.',
                       style: TextStyle(fontSize: 13, color: Cores.subtitulo),

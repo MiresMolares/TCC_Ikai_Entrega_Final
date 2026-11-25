@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../pages_login/login.dart';
+import '../../pages_login/requisitos_senha.dart';
 import '../../services/auth_service.dart';
 import '../../services/biblioteca_service.dart';
-import '../../services/compromisso_service.dart';
 import '../../services/config_service.dart';
-import '../../services/ik_ai_service.dart';
 import '../../services/progresso_service.dart';
 import '../../core/uso_diario.dart';
-import '../../services/gemini_service.dart';
 import '../../services/sessao_usuario.dart';
 import '../../services/tempo_diario.dart';
 import '../../widgets/estilo.dart';
@@ -26,12 +24,11 @@ class ConfiguracoesPage extends StatelessWidget {
 
   Future<void> _exportar(BuildContext context) async {
     final u = AuthService.instance.usuarioAtual;
-    final json = '{"conta":{"nome":${_aspas(u?.nome ?? '')},'
+    final json =
+        '{"conta":{"nome":${_aspas(u?.nome ?? '')},'
         '"email":${_aspas(u?.email ?? '')}},'
         '"biblioteca":${BibliotecaService.instance.exportarJson()},'
         '"progresso":${ProgressoService.instance.exportarJson()},'
-        '"ik_ai":${IkAiService.exportarJson()},'
-        '"combinados":${CompromissoService.instance.exportarJson()},'
         '"tempo":${TempoDiarioService.instance.exportarJson()}}';
     await Clipboard.setData(ClipboardData(text: json));
     if (context.mounted) {
@@ -116,11 +113,27 @@ class ConfiguracoesPage extends StatelessWidget {
             const _Secao('Preferências'),
             _Cartao([
               SwitchListTile(
+                value: cfg.escuro,
+                onChanged: cfg.definirEscuro,
+                activeTrackColor: Cores.verde,
+                secondary: Icon(
+                  cfg.escuro
+                      ? Icons.dark_mode_outlined
+                      : Icons.light_mode_outlined,
+                  color: Cores.laranja,
+                ),
+                title: const Text('Modo escuro'),
+                subtitle: const Text('Fundo escuro, mais confortável à noite.'),
+              ),
+              SwitchListTile(
                 value: cfg.notificacoes,
                 onChanged: cfg.definirNotificacoes,
                 activeTrackColor: Cores.verde,
                 title: const Text('Notificações'),
-                subtitle: const Text('Desligadas por padrão.'),
+                subtitle: const Text(
+                  'Mostra no sino o número de comentários e respostas que '
+                  'você ainda não viu. Desligadas por padrão.',
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -143,7 +156,7 @@ class ConfiguracoesPage extends StatelessWidget {
             ]),
             const _Secao('Seu tempo no Ikai'),
             const _CartaoMeta(),
-            const _Secao('Ik AI'),
+            const SizedBox(height: 12),
             _Cartao([
               SwitchListTile(
                 value: TempoDiarioService.instance.avancado,
@@ -151,39 +164,10 @@ class ConfiguracoesPage extends StatelessWidget {
                 activeTrackColor: Cores.verde,
                 title: const Text('Versão avançada'),
                 subtitle: const Text(
-                  'Acrescenta o lembrete de foco e o espaço para contar à '
-                  'Ik AI o que você quer fazer longe da tela.',
+                  'Acrescenta um lembrete de foco opcional ao escolher o '
+                  'que ver no dia.',
                 ),
               ),
-              GeminiService.padrao.configurado
-                  ? SwitchListTile(
-                      secondary: const Icon(
-                        Icons.cloud_done_outlined,
-                        color: Cores.laranja,
-                      ),
-                      value: cfg.geminiAutorizado == true,
-                      onChanged: cfg.definirGeminiAutorizado,
-                      activeTrackColor: Cores.verde,
-                      title: const Text('IA da Ik AI (Gemini, Google)'),
-                      subtitle: const Text(
-                        'Disponível. Se ligada, só o que você escrever na '
-                        'conversa é enviado; nunca seu nome nem seu e-mail. '
-                        'Desligada, as respostas são prontas, no aparelho.',
-                      ),
-                    )
-                  : const ListTile(
-                      leading: Icon(
-                        Icons.cloud_off_outlined,
-                        color: Cores.laranja,
-                      ),
-                      title: Text('IA da Ik AI (Gemini, Google)'),
-                      subtitle: Text(
-                        'Indisponível: o servidor do Ikai não está '
-                        'conectado ou não tem a chave. Enquanto isso, as '
-                        'respostas são prontas, geradas no seu aparelho '
-                        '(veja o README_ENTREGA.md).',
-                      ),
-                    ),
             ]),
             const _Secao('Privacidade e dados'),
             _Cartao([
@@ -235,7 +219,10 @@ class ConfiguracoesPage extends StatelessWidget {
                 titulo: 'Sobre o Ikai',
                 aoTocar: () => _abrir(
                   context,
-                  const PaginaTexto(titulo: 'Sobre o Ikai', texto: TextosApp.sobre),
+                  const PaginaTexto(
+                    titulo: 'Sobre o Ikai',
+                    texto: TextosApp.sobre,
+                  ),
                 ),
               ),
             ]),
@@ -246,7 +233,7 @@ class ConfiguracoesPage extends StatelessWidget {
               label: const Text('Sair da conta'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Cores.laranja,
-                side: const BorderSide(color: Cores.laranja),
+                side: BorderSide(color: Cores.laranja),
                 minimumSize: const Size.fromHeight(50),
               ),
             ),
@@ -297,7 +284,7 @@ class _CartaoMeta extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Cores.cartao,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Cores.bordaQuente),
       ),
@@ -306,9 +293,9 @@ class _CartaoMeta extends StatelessWidget {
         children: [
           const Text('Meta diária de uso'),
           const SizedBox(height: 2),
-          const Text(
-            'A Ik AI avisa na metade e conversa com você no fim. Diminuir '
-            'vale na hora; aumentar vale a partir de amanhã.',
+          Text(
+            'O Ikai avisa na metade e no fim do tempo. Diminuir vale na '
+            'hora; aumentar vale a partir de amanhã.',
             style: TextStyle(fontSize: 12, color: Cores.subtitulo),
           ),
           const SizedBox(height: 8),
@@ -328,7 +315,7 @@ class _CartaoMeta extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Amanhã sua meta passa a ${formatarHm(amanha * 60)}.',
-              style: const TextStyle(fontSize: 12, color: Cores.verde),
+              style: TextStyle(fontSize: 12, color: Cores.verde),
             ),
           ],
         ],
@@ -343,16 +330,16 @@ class _Secao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
-        child: Text(
-          titulo,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: Cores.subtitulo,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
+    child: Text(
+      titulo,
+      style: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.bold,
+        color: Cores.subtitulo,
+      ),
+    ),
+  );
 }
 
 class _Cartao extends StatelessWidget {
@@ -361,13 +348,13 @@ class _Cartao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Cores.bordaQuente),
-        ),
-        child: Column(children: filhos),
-      );
+    decoration: BoxDecoration(
+      color: Cores.cartao,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: Cores.bordaQuente),
+    ),
+    child: Column(children: filhos),
+  );
 }
 
 class _Item extends StatelessWidget {
@@ -383,11 +370,11 @@ class _Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListTile(
-        leading: Icon(icone, color: Cores.laranja),
-        title: Text(titulo),
-        trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-        onTap: aoTocar,
-      );
+    leading: Icon(icone, color: Cores.laranja),
+    title: Text(titulo),
+    trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+    onTap: aoTocar,
+  );
 }
 
 class _AlterarSenhaPage extends StatefulWidget {
@@ -415,8 +402,10 @@ class _AlterarSenhaPageState extends State<_AlterarSenhaPage> {
       mostrarAviso(context, 'As senhas não coincidem.');
       return;
     }
-    final erro = await AuthService.instance
-        .alterarSenha(atual: _atual.text, nova: _nova.text);
+    final erro = await AuthService.instance.alterarSenha(
+      atual: _atual.text,
+      nova: _nova.text,
+    );
     if (!mounted) return;
     if (erro != null) {
       mostrarAviso(context, erro);
@@ -430,18 +419,18 @@ class _AlterarSenhaPageState extends State<_AlterarSenhaPage> {
   }
 
   Widget _campo(TextEditingController c, String rotulo) => Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: TextField(
-          controller: c,
-          obscureText: true,
-          decoration: InputDecoration(
-            labelText: rotulo,
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-          ),
-        ),
-      );
+    padding: const EdgeInsets.only(bottom: 16),
+    child: TextField(
+      controller: c,
+      obscureText: true,
+      decoration: InputDecoration(
+        labelText: rotulo,
+        filled: true,
+        fillColor: Cores.cartao,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -456,6 +445,10 @@ class _AlterarSenhaPageState extends State<_AlterarSenhaPage> {
         children: [
           _campo(_atual, 'Senha atual'),
           _campo(_nova, 'Nova senha'),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: RequisitosSenha(controller: _nova),
+          ),
           _campo(_confirma, 'Confirmar nova senha'),
           ElevatedButton(
             onPressed: _salvar,

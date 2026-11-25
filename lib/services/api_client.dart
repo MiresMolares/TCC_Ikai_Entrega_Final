@@ -45,6 +45,8 @@ Future<RespostaApi> _enviarPadrao(
       f = http.post(url, headers: cabecalhos, body: corpo);
     case 'PATCH':
       f = http.patch(url, headers: cabecalhos, body: corpo);
+    case 'PUT':
+      f = http.put(url, headers: cabecalhos, body: corpo);
     case 'DELETE':
       f = http.delete(url, headers: cabecalhos);
     default:
@@ -85,9 +87,6 @@ class ApiClient {
   /// Token de login (só em memória: fechar o app pede login de novo).
   String? token;
 
-  /// O servidor tem a chave do Gemini (vem na resposta do login).
-  bool iaNoServidor = false;
-
   bool get ativo => baseUrl.isNotEmpty;
 
   Map<String, String> get cabecalhos => {
@@ -99,7 +98,6 @@ class ApiClient {
 
   void limparSessao() {
     token = null;
-    iaNoServidor = false;
   }
 
   /// Faz a chamada. Devolve o JSON já lido (ou null se não houver corpo).

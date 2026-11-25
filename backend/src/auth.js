@@ -22,7 +22,11 @@ export function exigirLogin({ db, config }) {
         throw naoAutorizado('Sua sessão expirou. Entre de novo.');
       }
       if (!ObjectId.isValid(carga.sub)) throw naoAutorizado();
-      const u = await db.usuarios.findOne({ _id: new ObjectId(carga.sub) });
+      // A foto (binária) não vem: só é lida na rota dela.
+      const u = await db.usuarios.findOne(
+        { _id: new ObjectId(carga.sub) },
+        { projection: { 'foto.dados': 0 } },
+      );
       if (!u) throw naoAutorizado('Conta não encontrada.');
       req.usuario = u;
       next();

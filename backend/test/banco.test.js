@@ -29,7 +29,7 @@ let contador = 0;
 async function novaConta(nome = 'Ana Souza') {
   contador += 1;
   const email = `pessoa${contador}@exemplo.com`;
-  const r = await chamar('POST', '/auth/cadastro', { nome, email, senha: 'senha-forte-1' });
+  const r = await chamar('POST', '/auth/cadastro', { nome, email, senha: 'Senha-forte-1' });
   assert.equal(r.status, 201, JSON.stringify(r.json));
   const u = await db.usuarios.findOne({ email });
   return { token: r.json.token, id: u._id };

@@ -4,28 +4,30 @@ import helmet from 'helmet';
 import { ErroHttp } from './erros.js';
 import { rotasAuth } from './rotas/auth.js';
 import { rotasConteudo } from './rotas/conteudo.js';
-import { rotasIa } from './rotas/ia.js';
 import { rotasCatalogo } from './rotas/catalogo.js';
 import { rotasSessoes } from './rotas/sessoes.js';
 import { rotasPreferencias } from './rotas/preferencias.js';
 import { rotasNotificacoes } from './rotas/notificacoes.js';
+import { rotasPerfil } from './rotas/perfil.js';
 
-/** Monta o app Express. `db` tem as coleções; `fetchImpl` é trocável nos testes. */
-export function criarApp({ db, config, fetchImpl }) {
+/** Monta o app Express. `db` tem as coleções. */
+export function criarApp({ db, config }) {
   const app = express();
   app.disable('x-powered-by');
   app.use(helmet());
   app.use(cors({ origin: config.corsOrigem === '*' ? true : config.corsOrigem.split(',') }));
-  // 64 KB para tudo, exceto criar ou editar artigo, que pode trazer a capa.
+  // 64 KB para tudo, exceto criar ou editar artigo (pode trazer a capa) e
+  // trocar a foto de perfil.
   const jsonPequeno = express.json({ limit: '64kb' });
   const jsonComCapa = express.json({ limit: '600kb' });
   const comCapa = (req) =>
     (req.method === 'POST' && req.path === '/artigos') ||
-    (req.method === 'PATCH' && /^\/artigos\/[^/]+$/.test(req.path));
+    (req.method === 'PATCH' && /^\/artigos\/[^/]+$/.test(req.path)) ||
+    (req.method === 'PUT' && req.path === '/auth/eu/foto');
   app.use((req, res, next) => (comCapa(req) ? jsonComCapa : jsonPequeno)(req, res, next));
 
   app.get('/saude', (_req, res) => {
-    res.json({ ok: true, ia: Boolean(config.geminiKey) });
+    res.json({ ok: true });
   });
 
   app.use(rotasAuth({ db, config }));
@@ -34,7 +36,7 @@ export function criarApp({ db, config, fetchImpl }) {
   app.use(rotasSessoes({ db, config }));
   app.use(rotasPreferencias({ db, config }));
   app.use(rotasNotificacoes({ db, config }));
-  app.use(rotasIa({ db, config, fetchImpl }));
+  app.use(rotasPerfil({ db, config }));
 
   app.use((_req, res) => res.status(404).json({ erro: 'Rota não encontrada.' }));
 

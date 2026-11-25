@@ -1,5 +1,7 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../widgets/estilo.dart';
 
 /// Preferências do aparelho que realmente têm efeito no app.
 ///
@@ -12,7 +14,7 @@ class ConfigService extends ChangeNotifier {
   static const _kNotificacoes = 'cfg_notificacoes';
   static const _kTexto = 'cfg_tamanho_texto';
   static const _kNivel = 'cfg_nivel_conteudo';
-  static const _kGemini = 'cfg_gemini_autorizado';
+  static const _kEscuro = 'cfg_modo_escuro';
 
   static const double textoMinimo = 0.8;
   static const double textoMaximo = 1.4;
@@ -20,17 +22,16 @@ class ConfigService extends ChangeNotifier {
   bool _notificacoes = false;
   double _tamanhoTexto = 1.0;
   int _nivelConteudo = 0;
-  bool? _geminiAutorizado;
+  bool _escuro = false;
 
   bool get notificacoes => _notificacoes;
+
+  /// Modo escuro (vale para o aparelho, não para a conta).
+  bool get escuro => _escuro;
   double get tamanhoTexto => _tamanhoTexto;
 
   /// Nível de dificuldade que o usuário quer ver: 0 todos, 1 a 3.
   int get nivelConteudo => _nivelConteudo;
-
-  /// A pessoa autorizou a Ik AI a usar a IA (Gemini)? null = ainda não
-  /// respondeu (o chat pergunta uma vez). Só vale com o Gemini disponível.
-  bool? get geminiAutorizado => _geminiAutorizado;
 
   Future<void> carregar() async {
     try {
@@ -40,11 +41,38 @@ class ConfigService extends ChangeNotifier {
       _tamanhoTexto = t.clamp(textoMinimo, textoMaximo).toDouble();
       final n = p.getInt(_kNivel) ?? 0;
       _nivelConteudo = (n >= 0 && n <= 3) ? n : 0;
-      _geminiAutorizado = p.getBool(_kGemini);
+      _escuro = p.getBool(_kEscuro) ?? false;
     } catch (_) {
       // Sem armazenamento, usa os padrões.
     }
+    Cores.escuro = _escuro;
     notifyListeners();
+  }
+
+  Future<void> definirEscuro(bool valor) async {
+    if (valor == _escuro) return;
+    _escuro = valor;
+    Cores.escuro = valor;
+    notifyListeners();
+    _redesenharTudo();
+    try {
+      final p = await SharedPreferences.getInstance();
+      await p.setBool(_kEscuro, valor);
+    } catch (_) {}
+  }
+
+  /// As cores do Ikai não vêm do Theme, então trocar o tema não basta:
+  /// pede para cada widget montado se redesenhar (sem perder o estado nem
+  /// as telas abertas).
+  static void _redesenharTudo() {
+    final raiz = WidgetsBinding.instance.rootElement;
+    if (raiz == null) return;
+    void marcar(Element e) {
+      e.markNeedsBuild();
+      e.visitChildren(marcar);
+    }
+
+    raiz.visitChildren(marcar);
   }
 
   Future<void> definirNotificacoes(bool valor) async {
@@ -72,15 +100,6 @@ class ConfigService extends ChangeNotifier {
     try {
       final p = await SharedPreferences.getInstance();
       await p.setInt(_kNivel, nivel);
-    } catch (_) {}
-  }
-
-  Future<void> definirGeminiAutorizado(bool valor) async {
-    _geminiAutorizado = valor;
-    notifyListeners();
-    try {
-      final p = await SharedPreferences.getInstance();
-      await p.setBool(_kGemini, valor);
     } catch (_) {}
   }
 }

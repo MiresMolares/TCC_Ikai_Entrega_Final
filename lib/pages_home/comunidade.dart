@@ -54,7 +54,7 @@ class ComunidadePage extends StatelessWidget {
       builder: (context, _) => ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
         children: [
-          const Text(
+          Text(
             'Comunidades',
             style: TextStyle(
               fontSize: 24,
@@ -63,7 +63,7 @@ class ComunidadePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Grupos pequenos, por assunto. Sem curtidas, sem ranking.',
             style: TextStyle(fontSize: 13, color: Cores.subtitulo),
           ),
@@ -100,7 +100,7 @@ class ComunidadePage extends StatelessWidget {
                   label: const Text('Meus artigos'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Cores.laranja,
-                    side: const BorderSide(color: Cores.laranja),
+                    side: BorderSide(color: Cores.laranja),
                     minimumSize: const Size.fromHeight(46),
                   ),
                 ),
@@ -112,7 +112,7 @@ class ComunidadePage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Material(
-                color: Colors.white,
+                color: Cores.cartao,
                 borderRadius: BorderRadius.circular(16),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
@@ -144,7 +144,7 @@ class ComunidadePage extends StatelessWidget {
                             children: [
                               Text(
                                 c.nome,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
                                   color: Cores.titulo,
@@ -155,7 +155,7 @@ class ComunidadePage extends StatelessWidget {
                                 servico.euCriei(c)
                                     ? '${c.descricao}  (criada por você)'
                                     : c.descricao,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   color: Cores.subtitulo,
                                 ),
@@ -249,8 +249,9 @@ class _ComunidadePageState extends State<_ComunidadePage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Artigo> artigos =
-        ArtigosRepositorio.dasCategorias(_c.categoriaIds);
+    final List<Artigo> artigos = ArtigosRepositorio.dasCategorias(
+      _c.categoriaIds,
+    );
 
     return Scaffold(
       backgroundColor: Cores.fundo,
@@ -287,7 +288,7 @@ class _ComunidadePageState extends State<_ComunidadePage> {
                           color: Cores.verdeClaro,
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Seus filtros do dia estão suspensos enquanto você '
                           'está aqui.',
                           style: TextStyle(
@@ -297,7 +298,7 @@ class _ComunidadePageState extends State<_ComunidadePage> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
+                      Text(
                         'Regras da comunidade',
                         style: TextStyle(
                           fontSize: 15,
@@ -311,14 +312,14 @@ class _ComunidadePageState extends State<_ComunidadePage> {
                           padding: const EdgeInsets.only(bottom: 4),
                           child: Text(
                             '- $r',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               color: Cores.subtitulo,
                             ),
                           ),
                         ),
                       const SizedBox(height: 20),
-                      const Text(
+                      Text(
                         'Mural',
                         style: TextStyle(
                           fontSize: 15,
@@ -328,7 +329,7 @@ class _ComunidadePageState extends State<_ComunidadePage> {
                       ),
                       const SizedBox(height: 8),
                       if (posts.isEmpty)
-                        const Text(
+                        Text(
                           'Ninguém escreveu ainda. Que tal começar?',
                           style: TextStyle(color: Cores.subtitulo),
                         )
@@ -338,11 +339,10 @@ class _ComunidadePageState extends State<_ComunidadePage> {
                             post: p,
                             podeApagar:
                                 _servico.euEscrevi(p) || _servico.euCriei(_c),
-                            aoApagar: () =>
-                                _servico.apagarPost(_c.id, p.id),
+                            aoApagar: () => _servico.apagarPost(_c.id, p.id),
                           ),
                       const SizedBox(height: 20),
-                      const Text(
+                      Text(
                         'Leituras da comunidade',
                         style: TextStyle(
                           fontSize: 15,
@@ -352,7 +352,7 @@ class _ComunidadePageState extends State<_ComunidadePage> {
                       ),
                       const SizedBox(height: 10),
                       if (artigos.isEmpty)
-                        const Text(
+                        Text(
                           'Ainda não há leituras aqui.',
                           style: TextStyle(color: Cores.subtitulo),
                         )
@@ -373,8 +373,8 @@ class _ComunidadePageState extends State<_ComunidadePage> {
   Widget _caixaDeMensagem() {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: Cores.cartao,
         border: Border(top: BorderSide(color: Cores.bordaQuente)),
       ),
       child: Column(
@@ -408,7 +408,7 @@ class _ComunidadePageState extends State<_ComunidadePage> {
               IconButton(
                 tooltip: 'Enviar',
                 onPressed: _enviando ? null : _enviar,
-                icon: const Icon(Icons.send_rounded, color: Cores.laranja),
+                icon: Icon(Icons.send_rounded, color: Cores.laranja),
               ),
             ],
           ),
@@ -431,12 +431,14 @@ class _PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final quando = chaveDoDia(DateTime.fromMillisecondsSinceEpoch(post.criadoMs));
+    final quando = chaveDoDia(
+      DateTime.fromMillisecondsSinceEpoch(post.criadoMs),
+    );
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.fromLTRB(14, 10, 4, 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Cores.cartao,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Cores.borda),
       ),
@@ -449,7 +451,7 @@ class _PostCard extends StatelessWidget {
               children: [
                 Text(
                   '${post.autorNome}  ·  $quando',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: Cores.subtitulo,
@@ -458,7 +460,7 @@ class _PostCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   post.texto,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     height: 1.4,
                     color: Cores.titulo,

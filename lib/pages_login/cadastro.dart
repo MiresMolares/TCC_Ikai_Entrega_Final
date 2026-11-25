@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../core/senha.dart';
 import '../services/auth_service.dart';
 import '../widgets/estilo.dart';
+import 'requisitos_senha.dart';
 import 'widgets_login.dart';
 
 class CadastroPage extends StatefulWidget {
@@ -16,8 +18,7 @@ class _CadastroPageState extends State<CadastroPage> {
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
-  final TextEditingController confirmaSenhaController =
-      TextEditingController();
+  final TextEditingController confirmaSenhaController = TextEditingController();
 
   bool esconderSenha = true;
   bool esconderConfirmaSenha = true;
@@ -40,6 +41,11 @@ class _CadastroPageState extends State<CadastroPage> {
         senhaController.text.isEmpty ||
         confirmaSenhaController.text.isEmpty) {
       mostrarAviso(context, 'Preencha todos os campos.');
+      return;
+    }
+    final fraca = Senha.problema(senhaController.text);
+    if (fraca != null) {
+      mostrarAviso(context, fraca);
       return;
     }
     if (senhaController.text != confirmaSenhaController.text) {
@@ -71,16 +77,14 @@ class _CadastroPageState extends State<CadastroPage> {
       );
   }
 
-  void _loginSocial() => mostrarAviso(context, avisoLoginSocial);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cadastro'),
-        backgroundColor: fundoLogin,
+        backgroundColor: Cores.fundoLogin,
       ),
-      backgroundColor: fundoLogin,
+      backgroundColor: Cores.fundoLogin,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -128,6 +132,8 @@ class _CadastroPageState extends State<CadastroPage> {
                     setState(() => esconderSenha = !esconderSenha),
                 acao: TextInputAction.next,
               ),
+              const SizedBox(height: 6),
+              RequisitosSenha(controller: senhaController),
               const SizedBox(height: 15),
               CampoLogin(
                 controller: confirmaSenhaController,
@@ -143,20 +149,6 @@ class _CadastroPageState extends State<CadastroPage> {
               ),
               const SizedBox(height: 25),
               BotaoPrincipal(texto: 'Cadastrar', onPressed: cadastrar),
-              const SizedBox(height: 15),
-              const DivisorOu(),
-              const SizedBox(height: 15),
-              BotaoSocial(
-                texto: 'Continuar com Google',
-                imagem: 'assets/logo_google.png',
-                onPressed: _loginSocial,
-              ),
-              const SizedBox(height: 10),
-              BotaoSocial(
-                texto: 'Continuar com Facebook',
-                imagem: 'assets/logo_facebook.png',
-                onPressed: _loginSocial,
-              ),
               const SizedBox(height: 40),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -106,7 +106,7 @@ class _EscreverArtigoPageState extends State<EscreverArtigoPage> {
         ? 'O resumo aparece aqui.'
         : _resumo.text.trim(),
     nivel: _nivel,
-    tags: const [],
+    tags: [],
     paragrafos: [_corpo.text.isEmpty ? '.' : _corpo.text],
     capa: _capa,
     capaUrl: _capa == null ? _capaUrl : null,
@@ -114,16 +114,13 @@ class _EscreverArtigoPageState extends State<EscreverArtigoPage> {
 
   Widget _rotuloPrevia(String texto) => Padding(
     padding: const EdgeInsets.only(top: 12, bottom: 6),
-    child: Text(
-      texto,
-      style: const TextStyle(fontSize: 12, color: Cores.subtitulo),
-    ),
+    child: Text(texto, style: TextStyle(fontSize: 12, color: Cores.subtitulo)),
   );
 
   Widget _campoCapa() {
     if (!_temCapa) {
       return Material(
-        color: Colors.white,
+        color: Cores.cartao,
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
@@ -136,7 +133,7 @@ class _EscreverArtigoPageState extends State<EscreverArtigoPage> {
             ),
             child: Column(
               children: [
-                const Icon(
+                Icon(
                   Icons.add_photo_alternate_outlined,
                   size: 32,
                   color: Cores.verde,
@@ -144,14 +141,14 @@ class _EscreverArtigoPageState extends State<EscreverArtigoPage> {
                 const SizedBox(height: 8),
                 Text(
                   _escolhendoCapa ? 'Abrindo...' : 'Adicionar imagem de capa',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: Cores.titulo,
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   'Ela abre o artigo, larga, e aparece como miniatura nas '
                   'listas. Prefira uma imagem horizontal com o principal no '
                   'centro.',
@@ -276,7 +273,7 @@ class _EscreverArtigoPageState extends State<EscreverArtigoPage> {
     hintText: dica,
     alignLabelWithHint: true,
     filled: true,
-    fillColor: Colors.white,
+    fillColor: Cores.cartao,
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
   );
 
@@ -284,7 +281,7 @@ class _EscreverArtigoPageState extends State<EscreverArtigoPage> {
     padding: const EdgeInsets.only(top: 18, bottom: 8),
     child: Text(
       texto,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.bold,
         color: Cores.tituloVerde,
@@ -317,7 +314,7 @@ class _EscreverArtigoPageState extends State<EscreverArtigoPage> {
                           'Ikai, na categoria que você escolher.'
                     : 'Por enquanto, o que você publica fica só neste '
                           'aparelho.',
-                style: const TextStyle(fontSize: 12, color: Cores.tituloVerde),
+                style: TextStyle(fontSize: 12, color: Cores.tituloVerde),
               ),
             ),
             _secao('Onde ele aparece'),

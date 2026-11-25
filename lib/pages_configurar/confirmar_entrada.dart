@@ -35,7 +35,7 @@ class _ConfirmarEntradaPageState extends State<ConfirmarEntradaPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Text(
+          title: Text(
             'Bem-vindo ao Ikai!',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -43,18 +43,19 @@ class _ConfirmarEntradaPageState extends State<ConfirmarEntradaPage> {
               color: Cores.tituloVerde,
             ),
           ),
-          content: const Text(
+          content: Text(
             'Você realmente quer entrar agora?',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 16, color: Cores.subtitulo),
           ),
           actionsAlignment: MainAxisAlignment.spaceEvenly,
           actions: [
-            ElevatedButton(
+            // Os dois botões têm o mesmo estilo de propósito: o Ikai não
+            // empurra a pessoa a entrar (Pilar 1).
+            OutlinedButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Cores.laranja,
-                foregroundColor: Colors.white,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Cores.tituloVerde,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -109,7 +110,7 @@ class _ConfirmarEntradaPageState extends State<ConfirmarEntradaPage> {
             'assets/ikai.png',
             height: 350,
             fit: BoxFit.contain,
-            errorBuilder: (context, erro, pilha) => const Text(
+            errorBuilder: (context, erro, pilha) => Text(
               'Ikai',
               style: TextStyle(
                 fontSize: 48,

@@ -135,7 +135,7 @@ class _CartaoUsoSemanalState extends State<CartaoUsoSemanal> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Seu tempo no Ikai',
                 style: TextStyle(
                   fontSize: 14,
@@ -146,7 +146,7 @@ class _CartaoUsoSemanalState extends State<CartaoUsoSemanal> {
               const SizedBox(height: 6),
               Text(
                 resumo.texto,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   height: 1.4,
                   color: Cores.tituloVerde,
@@ -158,7 +158,7 @@ class _CartaoUsoSemanalState extends State<CartaoUsoSemanal> {
                 const SizedBox(height: 4),
                 Text(
                   'A linha marca a sua meta de ${formatarHm(resumo.metaSeg)}.',
-                  style: const TextStyle(fontSize: 11, color: Cores.subtitulo),
+                  style: TextStyle(fontSize: 11, color: Cores.subtitulo),
                 ),
               ],
               const SizedBox(height: 12),
@@ -166,14 +166,14 @@ class _CartaoUsoSemanalState extends State<CartaoUsoSemanal> {
                 Text(
                   'Nesta semana você respondeu: ${nomeDoBalanco(feito.resposta)}.'
                   '${feito.texto.isEmpty ? '' : ' "${feito.texto}"'}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     height: 1.4,
                     color: Cores.subtitulo,
                   ),
                 )
               else ...[
-                const Text(
+                Text(
                   'O que você tem a dizer sobre o seu algoritmo? Você sente '
                   'que está ganhando tempo com o Ikai?',
                   style: TextStyle(
@@ -192,7 +192,7 @@ class _CartaoUsoSemanalState extends State<CartaoUsoSemanal> {
                       ChoiceChip(
                         label: Text(nomeDoBalanco(r)),
                         selected: _escolhida == r,
-                        selectedColor: Colors.white,
+                        selectedColor: Cores.cartao,
                         onSelected: (_) => setState(() => _escolhida = r),
                       ),
                   ],
@@ -208,10 +208,10 @@ class _CartaoUsoSemanalState extends State<CartaoUsoSemanal> {
                     decoration: InputDecoration(
                       hintText: 'Quer explicar? (opcional)',
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Cores.cartao,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Cores.borda),
+                        borderSide: BorderSide(color: Cores.borda),
                       ),
                     ),
                   ),

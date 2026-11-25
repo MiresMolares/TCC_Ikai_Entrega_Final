@@ -47,7 +47,7 @@ class _SplashPageState extends State<SplashPage> {
             'assets/ikai.png',
             height: 350,
             fit: BoxFit.contain,
-            errorBuilder: (context, erro, pilha) => const Text(
+            errorBuilder: (context, erro, pilha) => Text(
               'Ikai',
               style: TextStyle(
                 fontSize: 48,

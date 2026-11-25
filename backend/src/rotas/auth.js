@@ -4,10 +4,23 @@ import rateLimit from 'express-rate-limit';
 import { criarToken, exigirLogin } from '../auth.js';
 import { conflito, naoAutorizado, ruim } from '../erros.js';
 import { limpo } from '../texto.js';
+import { fotoUrl } from './perfil.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SENHA_MIN = 8;
 const SENHA_MAX = 72; // limite do bcrypt
+
+/** Senha forte (as mesmas regras de lib/core/senha.dart). Devolve o problema ou null. */
+export function problemaDaSenha(senha) {
+  if (senha.length > SENHA_MAX) return `A senha pode ter no máximo ${SENHA_MAX} caracteres.`;
+  const faltam = [];
+  if (senha.length < SENHA_MIN) faltam.push(`pelo menos ${SENHA_MIN} caracteres`);
+  if (!/[A-Z]/.test(senha)) faltam.push('uma letra maiúscula');
+  if (!/[a-z]/.test(senha)) faltam.push('uma letra minúscula');
+  if (!/[0-9]/.test(senha)) faltam.push('um número');
+  if (!/[^A-Za-z0-9\s]/.test(senha)) faltam.push('um caractere especial (ex.: ! @ # $ %)');
+  return faltam.length ? `A senha precisa ter: ${faltam.join(', ')}.` : null;
+}
 
 export function rotasAuth({ db, config }) {
   const r = Router();
@@ -15,9 +28,7 @@ export function rotasAuth({ db, config }) {
 
   const resposta = (u) => ({
     token: criarToken(config, u),
-    usuario: { nome: u.nome, email: u.email },
-    // O app usa isto para saber se pode oferecer a IA (a chave fica aqui).
-    ia: Boolean(config.geminiKey),
+    usuario: { nome: u.nome, email: u.email, foto: fotoUrl(u) },
   });
 
   // Contra tentativas de adivinhar senha: 20 a cada 15 minutos por IP.
@@ -37,10 +48,8 @@ export function rotasAuth({ db, config }) {
     const senha = String(req.body?.senha ?? '');
     if (nome.length < 2 || nome.length > 80) throw ruim('Informe seu nome completo.');
     if (!EMAIL.test(email) || email.length > 120) throw ruim('Informe um e-mail válido.');
-    if (senha.length < SENHA_MIN) {
-      throw ruim(`A senha deve ter pelo menos ${SENHA_MIN} caracteres.`);
-    }
-    if (senha.length > SENHA_MAX) throw ruim(`A senha pode ter no máximo ${SENHA_MAX} caracteres.`);
+    const fraca = problemaDaSenha(senha);
+    if (fraca) throw ruim(fraca);
 
     const doc = {
       nome,
@@ -73,8 +82,7 @@ export function rotasAuth({ db, config }) {
 
   r.get('/auth/eu', login, (req, res) => {
     res.json({
-      usuario: { nome: req.usuario.nome, email: req.usuario.email },
-      ia: Boolean(config.geminiKey),
+      usuario: { nome: req.usuario.nome, email: req.usuario.email, foto: fotoUrl(req.usuario) },
     });
   });
 
@@ -85,7 +93,7 @@ export function rotasAuth({ db, config }) {
       throw ruim('O nome deve ter pelo menos 2 caracteres.');
     }
     await db.usuarios.updateOne({ _id: req.usuario._id }, { $set: { nome } });
-    res.json({ usuario: { nome, email: req.usuario.email } });
+    res.json({ usuario: { nome, email: req.usuario.email, foto: fotoUrl(req.usuario) } });
   });
 
   r.post('/auth/senha', login, async (req, res) => {
@@ -94,10 +102,8 @@ export function rotasAuth({ db, config }) {
     if (!(await bcrypt.compare(atual, req.usuario.senhaHash))) {
       throw ruim('A senha atual está incorreta.');
     }
-    if (nova.length < SENHA_MIN) {
-      throw ruim(`A nova senha deve ter pelo menos ${SENHA_MIN} caracteres.`);
-    }
-    if (nova.length > SENHA_MAX) throw ruim(`A senha pode ter no máximo ${SENHA_MAX} caracteres.`);
+    const fraca = problemaDaSenha(nova);
+    if (fraca) throw ruim(fraca);
     const senhaHash = await bcrypt.hash(nova, config.bcryptCusto);
     await db.usuarios.updateOne({ _id: req.usuario._id }, { $set: { senhaHash } });
     res.status(204).end();

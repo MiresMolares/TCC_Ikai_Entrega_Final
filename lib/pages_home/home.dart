@@ -6,20 +6,17 @@ import '../pages_configurar/fluxo_objetivos_page.dart';
 import '../services/artigos_repositorio.dart';
 import '../services/auth_service.dart';
 import '../services/config_service.dart';
+import '../services/notificacoes_service.dart';
 import '../services/tempo_diario.dart';
-import '../core/recursos.dart';
 import '../core/uso_diario.dart';
 import '../widgets/artigo_card.dart';
-import '../widgets/cartao_checkin.dart';
 import '../widgets/cartao_uso_semanal.dart';
 import '../widgets/estilo.dart';
-import '../widgets/navegador.dart';
 import '../widgets/seletor_nivel.dart';
 import 'botoes_home/notificacao.dart';
 import 'biblioteca.dart';
 import 'comunidade.dart';
 import 'explorar.dart';
-import 'ik_ai_page.dart';
 import 'perfil.dart';
 import 'progresso.dart';
 
@@ -38,23 +35,8 @@ class _HomePageState extends State<HomePage> {
   /// Cada incremento pede para o Explorar focar o campo de busca.
   final ValueNotifier<int> _pedidoDeBusca = ValueNotifier(0);
 
-  Route<dynamic>? _rota;
-
-  /// Só a Home mostra o botão flutuante da Ik AI.
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final rota = ModalRoute.of(context);
-    if (!identical(rota, _rota)) {
-      NavegadorIk.desregistrarHome(_rota);
-      _rota = rota;
-      NavegadorIk.registrarHome(rota);
-    }
-  }
-
   @override
   void dispose() {
-    NavegadorIk.desregistrarHome(_rota);
     _pedidoDeBusca.dispose();
     super.dispose();
   }
@@ -82,33 +64,33 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: NavigationBar(
         height: 68,
-        backgroundColor: Colors.white,
+        backgroundColor: Cores.cartao,
         indicatorColor: Cores.verdeClaro,
         selectedIndex: _indice,
         onDestinationSelected: (i) => setState(() => _indice = i),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
+            icon: const Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home, color: Cores.verde),
             label: 'Início',
           ),
           NavigationDestination(
-            icon: Icon(Icons.search),
+            icon: const Icon(Icons.search),
             selectedIcon: Icon(Icons.search, color: Cores.verde),
             label: 'Explorar',
           ),
           NavigationDestination(
-            icon: Icon(Icons.people_outline),
+            icon: const Icon(Icons.people_outline),
             selectedIcon: Icon(Icons.people, color: Cores.verde),
             label: 'Comunidade',
           ),
           NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
+            icon: const Icon(Icons.bar_chart_outlined),
             selectedIcon: Icon(Icons.bar_chart, color: Cores.verde),
             label: 'Progresso',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline),
+            icon: const Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person, color: Cores.verde),
             label: 'Perfil',
           ),
@@ -150,7 +132,7 @@ class _InicioTabState extends State<InicioTab> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Filtrar o feed',
                   style: TextStyle(
                     fontSize: 18,
@@ -162,7 +144,7 @@ class _InicioTabState extends State<InicioTab> {
                 const SeletorNivel(),
                 if (tags.isNotEmpty) ...[
                   const SizedBox(height: 18),
-                  const Text(
+                  Text(
                     'Assunto',
                     style: TextStyle(
                       fontSize: 13,
@@ -254,10 +236,8 @@ class _InicioTabState extends State<InicioTab> {
         const SizedBox(height: 20),
         _CampoBuscaFalso(aoTocar: widget.aoBuscar),
         const SizedBox(height: 20),
-        const CartaoCheckIn(),
         const CartaoUsoSemanal(),
         const _CartaoMeta(),
-        if (conversaLivreIkAi) ...const [SizedBox(height: 12), _CartaoIkAi()],
         const SizedBox(height: 24),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -266,7 +246,7 @@ class _InicioTabState extends State<InicioTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Seu feed de hoje',
                     style: TextStyle(
                       fontSize: 18,
@@ -279,10 +259,7 @@ class _InicioTabState extends State<InicioTab> {
                     feed.length == 1
                         ? 'Um conteúdo escolhido para hoje.'
                         : '${feed.length} conteúdos escolhidos para hoje.',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Cores.subtitulo,
-                    ),
+                    style: TextStyle(fontSize: 13, color: Cores.subtitulo),
                   ),
                 ],
               ),
@@ -336,12 +313,12 @@ class _FiltrosAtivos extends StatelessWidget {
       padding: const EdgeInsets.only(top: 8),
       child: Row(
         children: [
-          const Icon(Icons.filter_alt_outlined, size: 16, color: Cores.verde),
+          Icon(Icons.filter_alt_outlined, size: 16, color: Cores.verde),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
               'Filtro: $texto',
-              style: const TextStyle(fontSize: 13, color: Cores.verde),
+              style: TextStyle(fontSize: 13, color: Cores.verde),
             ),
           ),
           TextButton(
@@ -375,7 +352,7 @@ class _SemNesteNivel extends StatelessWidget {
             'Ainda não há conteúdo de nível ${Artigo.nomeDoNivel(nivel).toLowerCase()} '
             'nesta categoria.',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Cores.subtitulo),
+            style: TextStyle(color: Cores.subtitulo),
           ),
           const SizedBox(height: 8),
           TextButton(
@@ -411,7 +388,7 @@ class _Cabecalho extends StatelessWidget {
           ),
           child: Text(
             inicial,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Cores.tituloVerde,
@@ -423,14 +400,14 @@ class _Cabecalho extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Que bom ver você',
                 style: TextStyle(fontSize: 13, color: Cores.subtitulo),
               ),
               Text(
                 nome.isEmpty ? 'Olá' : 'Olá, $nome',
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
                   color: Cores.titulo,
@@ -450,16 +427,36 @@ class _Cabecalho extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        _BotaoQuadrado(
-          icone: Icons.notifications_none_rounded,
-          dica: 'Notificações',
-          fundo: Colors.white,
-          cor: Cores.titulo,
-          borda: true,
-          aoTocar: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const NotificacaoPage()),
-          ),
+        // O número de novas só aparece se a pessoa ligou as notificações.
+        ListenableBuilder(
+          listenable: Listenable.merge([
+            NotificacoesService.instance,
+            ConfigService.instance,
+          ]),
+          builder: (context, _) {
+            final novas = ConfigService.instance.notificacoes
+                ? NotificacoesService.instance.naoLidas
+                : 0;
+            return _BotaoQuadrado(
+              icone: novas > 0
+                  ? Icons.notifications_rounded
+                  : Icons.notifications_none_rounded,
+              dica: novas > 0 ? 'Notificações ($novas novas)' : 'Notificações',
+              fundo: Cores.cartao,
+              cor: Cores.titulo,
+              borda: true,
+              selo: novas,
+              aoTocar: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NotificacaoPage(),
+                  ),
+                );
+                NotificacoesService.instance.atualizar();
+              },
+            );
+          },
         ),
       ],
     );
@@ -474,6 +471,9 @@ class _BotaoQuadrado extends StatelessWidget {
   final bool borda;
   final VoidCallback aoTocar;
 
+  /// Número pequeno no canto (0 = sem número).
+  final int selo;
+
   const _BotaoQuadrado({
     required this.icone,
     required this.dica,
@@ -481,6 +481,7 @@ class _BotaoQuadrado extends StatelessWidget {
     required this.cor,
     required this.aoTocar,
     this.borda = false,
+    this.selo = 0,
   });
 
   @override
@@ -500,7 +501,12 @@ class _BotaoQuadrado extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               border: borda ? Border.all(color: Cores.borda, width: 2) : null,
             ),
-            child: Icon(icone, color: cor, size: 26),
+            child: Badge(
+              isLabelVisible: selo > 0,
+              label: Text(selo > 9 ? '9+' : '$selo'),
+              backgroundColor: Cores.laranja,
+              child: Icon(icone, color: cor, size: 26),
+            ),
           ),
         ),
       ),
@@ -518,7 +524,7 @@ class _CampoBuscaFalso extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: Cores.cartao,
       borderRadius: BorderRadius.circular(19),
       child: InkWell(
         borderRadius: BorderRadius.circular(19),
@@ -529,69 +535,16 @@ class _CampoBuscaFalso extends StatelessWidget {
             borderRadius: BorderRadius.circular(19),
             border: Border.all(color: Cores.borda),
           ),
-          child: const Row(
+          child: Row(
             children: [
               Icon(Icons.search, color: Cores.titulo),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'Buscar no seu feed de hoje',
                   style: TextStyle(fontSize: 14, color: Cores.subtitulo),
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Atalho para conversar com a Ik AI quando a pessoa quiser ideias do que
-/// fazer longe da tela.
-class _CartaoIkAi extends StatelessWidget {
-  const _CartaoIkAi();
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: abrirIkAi,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Cores.bordaQuente),
-          ),
-          child: const Row(
-            children: [
-              Icon(Icons.chat_bubble_outline, color: Cores.laranja),
-              SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Conversar com a Ik AI',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Cores.titulo,
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      'Sem ideia do que fazer longe da tela? Conte o que '
-                      'você tem vontade.',
-                      style: TextStyle(fontSize: 12, color: Cores.subtitulo),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right, color: Colors.grey),
             ],
           ),
         ),
@@ -620,8 +573,8 @@ class _CartaoMetaState extends State<_CartaoMeta> {
       builder: (ctx) => AlertDialog(
         title: const Text('Encerrar por hoje?'),
         content: const Text(
-          'A Ik AI vai conversar com você sobre o que você aprendeu e '
-          'depois o app descansa até amanhã.',
+          'Você pode contar o que aprendeu hoje e depois o app descansa '
+          'até amanhã.',
         ),
         actions: [
           TextButton(
@@ -687,7 +640,7 @@ class _CartaoMetaState extends State<_CartaoMeta> {
                             children: [
                               TextSpan(
                                 text: formatarHm(t.restanteSeg),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Cores.laranja,
                                 ),
@@ -695,10 +648,7 @@ class _CartaoMetaState extends State<_CartaoMeta> {
                               const TextSpan(text: ' restantes hoje'),
                             ],
                           ),
-                          style: const TextStyle(
-                            fontSize: 15,
-                            color: Cores.titulo,
-                          ),
+                          style: TextStyle(fontSize: 15, color: Cores.titulo),
                         ),
                       ),
                       Icon(
@@ -718,7 +668,7 @@ class _CartaoMetaState extends State<_CartaoMeta> {
                         ? 'Passar o tempo: um pouco de tudo'
                         : '${c.titulosDosObjetivos}: '
                               '${c.titulosDasCategorias.isEmpty ? 'sem categoria' : c.titulosDasCategorias}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Cores.titulo,
@@ -727,10 +677,7 @@ class _CartaoMetaState extends State<_CartaoMeta> {
                   const SizedBox(height: 2),
                   Text(
                     'Meta de ${formatarHm(t.limiteHojeSeg)} por dia',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Cores.subtitulo,
-                    ),
+                    style: TextStyle(fontSize: 13, color: Cores.subtitulo),
                   ),
                   const SizedBox(height: 6),
                   Wrap(
@@ -789,7 +736,7 @@ class _Aviso extends StatelessWidget {
       child: Text(
         texto,
         textAlign: TextAlign.center,
-        style: const TextStyle(color: Cores.subtitulo),
+        style: TextStyle(color: Cores.subtitulo),
       ),
     );
   }
@@ -808,10 +755,10 @@ class _FimDoFeed extends StatelessWidget {
         color: Cores.verdeClaro,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: const Column(
+      child: Column(
         children: [
           Icon(Icons.check_circle_outline, color: Cores.verde, size: 32),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             'Você chegou ao fim do feed',
             style: TextStyle(
@@ -820,7 +767,7 @@ class _FimDoFeed extends StatelessWidget {
               color: Cores.tituloVerde,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             'Não há mais nada para rolar. Faça uma pausa, ou volte a um '
             'artigo que você quer reler.',

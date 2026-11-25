@@ -37,8 +37,9 @@ class _NomePastaDialog extends StatefulWidget {
 }
 
 class _NomePastaDialogState extends State<_NomePastaDialog> {
-  late final TextEditingController _c =
-      TextEditingController(text: widget.inicial);
+  late final TextEditingController _c = TextEditingController(
+    text: widget.inicial,
+  );
   String? _erro;
 
   @override
@@ -48,8 +49,10 @@ class _NomePastaDialogState extends State<_NomePastaDialog> {
   }
 
   void _salvar() {
-    final erro = BibliotecaService.instance
-        .validarNome(_c.text, ignorarId: widget.ignorarId);
+    final erro = BibliotecaService.instance.validarNome(
+      _c.text,
+      ignorarId: widget.ignorarId,
+    );
     if (erro != null) {
       setState(() => _erro = erro);
       return;
@@ -80,10 +83,7 @@ class _NomePastaDialogState extends State<_NomePastaDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancelar'),
         ),
-        TextButton(
-          onPressed: _salvar,
-          child: const Text('Salvar'),
-        ),
+        TextButton(onPressed: _salvar, child: const Text('Salvar')),
       ],
     );
   }
@@ -96,7 +96,7 @@ Future<void> mostrarSalvarEmPasta(BuildContext context, Artigo artigo) {
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
-    backgroundColor: Colors.white,
+    backgroundColor: Cores.cartao,
     builder: (_) => _SalvarEmPastaSheet(artigo: artigo),
   );
 }
@@ -134,8 +134,8 @@ class _SalvarEmPastaSheet extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
                   child: Text(
                     'Salvar na biblioteca',
                     style: TextStyle(

@@ -7,7 +7,6 @@ import 'pages_configurar/sessao_guard.dart';
 import 'pages_login/splash.dart';
 import 'services/auth_service.dart';
 import 'services/config_service.dart';
-import 'widgets/estilo.dart';
 import 'widgets/navegador.dart';
 
 Future<void> main() async {
@@ -35,21 +34,21 @@ class MainApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Ikai',
           navigatorKey: NavegadorIk.chave,
-          navigatorObservers: [NavegadorIk.observador],
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Cores.laranja),
-            useMaterial3: true,
-          ),
+          theme: _tema(Brightness.light),
+          darkTheme: _tema(Brightness.dark),
+          themeMode: ConfigService.instance.escuro
+              ? ThemeMode.dark
+              : ThemeMode.light,
           // O SessaoGuard fica ACIMA do Navigator: conta o tempo do dia,
-          // mostra os avisos e o botão da Ik AI e, quando a meta acaba,
-          // troca o app pela conversa de fim de tempo.
+          // mostra os avisos e, quando a meta acaba, troca o app pela tela
+          // de fim de tempo.
           builder: (context, child) => DevicePreview.appBuilder(
             context,
             Builder(
               builder: (context) => MediaQuery(
-                data: MediaQuery.of(context).copyWith(
-                  textScaler: TextScaler.linear(escalaTexto),
-                ),
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: TextScaler.linear(escalaTexto)),
                 child: SessaoGuard(child: child ?? const SizedBox.shrink()),
               ),
             ),
@@ -59,6 +58,20 @@ class MainApp extends StatelessWidget {
       },
     );
   }
+}
+
+ThemeData _tema(Brightness brilho) {
+  final escuro = brilho == Brightness.dark;
+  return ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: const Color(0xFFCB5A34),
+      brightness: brilho,
+    ),
+    scaffoldBackgroundColor: escuro
+        ? const Color(0xFF121512)
+        : const Color(0xFFFDFBF7),
+  );
 }
 
 /// Primeira tela do Navigator. Também é a que volta quando o Navigator é

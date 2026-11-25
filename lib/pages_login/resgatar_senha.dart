@@ -49,9 +49,9 @@ class _ResgatarSenhaPageState extends State<ResgatarSenhaPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recuperar senha'),
-        backgroundColor: fundoLogin,
+        backgroundColor: Cores.fundoLogin,
       ),
-      backgroundColor: fundoLogin,
+      backgroundColor: Cores.fundoLogin,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),

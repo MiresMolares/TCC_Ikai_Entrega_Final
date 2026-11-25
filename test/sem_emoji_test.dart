@@ -15,7 +15,11 @@ void main() {
   // Garante que ninguém coloque emoji no código do app por engano.
   test('nenhum arquivo de lib/ contém emoji', () {
     final raiz = Directory('lib');
-    expect(raiz.existsSync(), isTrue, reason: 'rode o teste na raiz do projeto');
+    expect(
+      raiz.existsSync(),
+      isTrue,
+      reason: 'rode o teste na raiz do projeto',
+    );
     final achados = <String>[];
     for (final f in raiz.listSync(recursive: true)) {
       if (f is! File || !f.path.endsWith('.dart')) continue;

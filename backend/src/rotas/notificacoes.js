@@ -4,15 +4,52 @@ import { exigirLogin } from '../auth.js';
 import { ErroHttp, naoEncontrado, ruim } from '../erros.js';
 import { limpo } from '../texto.js';
 
+// Tipos que a própria pessoa pode criar pela API.
 const TIPOS = ['lembrete', 'conquista', 'comunidade', 'sistema'];
 const MAX_GUARDADAS = 200;
+
+/**
+ * Notificação criada pelo servidor quando alguém interage com a pessoa
+ * (comentário no artigo dela, resposta a um comentário dela). Nunca falha
+ * o pedido principal: se a caixa estiver cheia, a mais antiga sai.
+ */
+export async function notificar(db, usuarioId, { tipo, titulo, descricao, artigoId }) {
+  try {
+    const total = await db.notificacoes.countDocuments({ usuarioId });
+    if (total >= MAX_GUARDADAS) {
+      const velhas = await db.notificacoes
+        .find({ usuarioId }, { projection: { _id: 1 } })
+        .sort({ criadaEm: 1 })
+        .limit(total - MAX_GUARDADAS + 1)
+        .toArray();
+      await db.notificacoes.deleteMany({ _id: { $in: velhas.map((n) => n._id) } });
+    }
+    await db.notificacoes.insertOne({
+      usuarioId,
+      tipo,
+      titulo: titulo.slice(0, 80),
+      descricao: descricao.slice(0, 300),
+      ...(artigoId ? { artigoId } : {}),
+      criadaEm: new Date(),
+      lida: false,
+    });
+  } catch (e) {
+    console.error('Não foi possível criar a notificação:', e?.message ?? e);
+  }
+}
 
 export function rotasNotificacoes({ db, config }) {
   const r = Router();
   const login = exigirLogin({ db, config });
 
   const saida = (n) => ({
-    id: n._id, tipo: n.tipo, titulo: n.titulo, descricao: n.descricao, criadaEm: n.criadaEm, lida: n.lida,
+    id: n._id,
+    tipo: n.tipo,
+    titulo: n.titulo,
+    descricao: n.descricao,
+    criadaEm: n.criadaEm,
+    lida: n.lida,
+    artigo: n.artigoId ?? null,
   });
 
   const idDaRota = (req) => {

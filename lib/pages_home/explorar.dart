@@ -66,7 +66,7 @@ class _ExplorarPageState extends State<ExplorarPage> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
-        const Text(
+        Text(
           'Explorar',
           style: TextStyle(
             fontSize: 24,
@@ -77,7 +77,7 @@ class _ExplorarPageState extends State<ExplorarPage> {
         const SizedBox(height: 4),
         Text(
           'Buscando em ${c.titulosDasCategorias.isEmpty ? 'suas categorias' : c.titulosDasCategorias}.',
-          style: const TextStyle(fontSize: 13, color: Cores.subtitulo),
+          style: TextStyle(fontSize: 13, color: Cores.subtitulo),
         ),
         const SizedBox(height: 12),
         const SeletorNivel(),
@@ -98,20 +98,20 @@ class _ExplorarPageState extends State<ExplorarPage> {
                   ),
             hintText: 'Título, autor ou assunto',
             filled: true,
-            fillColor: Colors.white,
+            fillColor: Cores.cartao,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(19),
-              borderSide: const BorderSide(color: Cores.borda),
+              borderSide: BorderSide(color: Cores.borda),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(19),
-              borderSide: const BorderSide(color: Cores.borda),
+              borderSide: BorderSide(color: Cores.borda),
             ),
           ),
         ),
         const SizedBox(height: 16),
         if (consulta.isEmpty && tags.isNotEmpty) ...[
-          const Text(
+          Text(
             'Assuntos',
             style: TextStyle(
               fontSize: 14,
@@ -132,8 +132,8 @@ class _ExplorarPageState extends State<ExplorarPage> {
             ],
           ),
         ] else if (resultado.isEmpty)
-          const Padding(
-            padding: EdgeInsets.only(top: 32),
+          Padding(
+            padding: const EdgeInsets.only(top: 32),
             child: Text(
               'Nada encontrado. Tente outra palavra.',
               textAlign: TextAlign.center,
@@ -145,7 +145,7 @@ class _ExplorarPageState extends State<ExplorarPage> {
             resultado.length == 1
                 ? '1 resultado'
                 : '${resultado.length} resultados',
-            style: const TextStyle(fontSize: 13, color: Cores.subtitulo),
+            style: TextStyle(fontSize: 13, color: Cores.subtitulo),
           ),
           const SizedBox(height: 10),
           ListaDeArtigos(artigos: resultado),

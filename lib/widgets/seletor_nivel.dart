@@ -16,10 +16,7 @@ class SeletorNivel extends StatelessWidget {
       runSpacing: 4,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        const Text(
-          'Nível:',
-          style: TextStyle(fontSize: 13, color: Cores.subtitulo),
-        ),
+        Text('Nível:', style: TextStyle(fontSize: 13, color: Cores.subtitulo)),
         for (var n = 0; n <= Artigo.nivelMaximo; n++)
           ChoiceChip(
             label: Text(Artigo.nomeDoNivel(n)),

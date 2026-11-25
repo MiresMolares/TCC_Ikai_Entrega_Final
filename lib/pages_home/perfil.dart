@@ -4,6 +4,7 @@ import '../pages_login/login.dart';
 import '../services/auth_service.dart';
 import '../services/sessao_usuario.dart';
 import '../widgets/estilo.dart';
+import '../widgets/foto_perfil_editavel.dart';
 import '../widgets/textos_app.dart';
 import 'biblioteca.dart';
 import 'botoes_perfil/configuracao.dart';
@@ -27,7 +28,7 @@ class PerfilPage extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Sair', style: TextStyle(color: Cores.laranja)),
+            child: Text('Sair', style: TextStyle(color: Cores.laranja)),
           ),
         ],
       ),
@@ -53,7 +54,7 @@ class PerfilPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Perfil',
                   style: TextStyle(
                     fontSize: 24,
@@ -78,17 +79,7 @@ class PerfilPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 28),
-            const Center(
-              child: CircleAvatar(
-                radius: 52,
-                backgroundColor: Color(0xFFF6E5DC),
-                child: Icon(
-                  Icons.person_outline,
-                  size: 56,
-                  color: Cores.laranja,
-                ),
-              ),
-            ),
+            const Center(child: FotoPerfilEditavel()),
             const SizedBox(height: 16),
             Center(
               child: Text(
@@ -96,7 +87,7 @@ class PerfilPage extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 21,
                   fontWeight: FontWeight.bold,
                   color: Cores.titulo,
@@ -109,14 +100,14 @@ class PerfilPage extends StatelessWidget {
                 u?.email ?? '',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                style: TextStyle(fontSize: 14, color: Cores.subtitulo),
               ),
             ),
             const SizedBox(height: 28),
             _CartaoNavegacao(
               icone: Icons.badge_outlined,
               titulo: 'Meu perfil',
-              descricao: 'Edite seu nome e e-mail',
+              descricao: 'Edite seu nome e sua foto',
               aoTocar: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -131,9 +122,7 @@ class PerfilPage extends StatelessWidget {
               descricao: 'Seus artigos salvos, em pastas',
               aoTocar: () => Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const BibliotecaPage(),
-                ),
+                MaterialPageRoute(builder: (context) => const BibliotecaPage()),
               ),
             ),
             const SizedBox(height: 12),
@@ -161,8 +150,8 @@ class PerfilPage extends StatelessWidget {
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Cores.laranja,
-                backgroundColor: Colors.white,
-                side: const BorderSide(color: Cores.laranja),
+                backgroundColor: Cores.cartao,
+                side: BorderSide(color: Cores.laranja),
                 minimumSize: const Size.fromHeight(52),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -192,7 +181,7 @@ class _CartaoNavegacao extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: Cores.cartao,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -221,7 +210,7 @@ class _CartaoNavegacao extends StatelessWidget {
                   children: [
                     Text(
                       titulo,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: Cores.titulo,
@@ -230,10 +219,7 @@ class _CartaoNavegacao extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       descricao,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
+                      style: TextStyle(fontSize: 12, color: Cores.subtitulo),
                     ),
                   ],
                 ),
@@ -288,9 +274,7 @@ class _EditarPerfilPageState extends State<EditarPerfilPage> {
     Navigator.pop(context);
     messenger
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(content: Text('Perfil atualizado.')),
-      );
+      ..showSnackBar(const SnackBar(content: Text('Perfil atualizado.')));
   }
 
   InputDecoration _decoracao(String rotulo, IconData icone) {
@@ -303,7 +287,7 @@ class _EditarPerfilPageState extends State<EditarPerfilPage> {
       labelText: rotulo,
       prefixIcon: Icon(icone, color: Cores.laranja),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: Cores.cartao,
       enabledBorder: borda(Cores.bordaQuente),
       focusedBorder: borda(Cores.laranja, 1.5),
     );
@@ -321,6 +305,15 @@ class _EditarPerfilPageState extends State<EditarPerfilPage> {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
+            const Center(child: FotoPerfilEditavel(raio: 44)),
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                'Toque na foto para colocar ou trocar',
+                style: TextStyle(fontSize: 12, color: Cores.subtitulo),
+              ),
+            ),
+            const SizedBox(height: 20),
             TextField(
               controller: _nome,
               textInputAction: TextInputAction.next,
@@ -332,7 +325,8 @@ class _EditarPerfilPageState extends State<EditarPerfilPage> {
               controller: _email,
               enabled: false,
               decoration: _decoracao('E-mail', Icons.alternate_email).copyWith(
-                helperText: 'O e-mail identifica a conta e não pode ser '
+                helperText:
+                    'O e-mail identifica a conta e não pode ser '
                     'alterado por enquanto.',
               ),
             ),
