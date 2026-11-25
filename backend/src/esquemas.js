@@ -157,6 +157,36 @@ export const ESQUEMAS = {
     },
   },
 
+  // Sugestões do fim do tempo (src/sugestoes.js), gravadas ao iniciar.
+  sugestoes: {
+    bsonType: 'object',
+    required: ['_id', 'tipo', 'titulo', 'como', 'minutos', 'objetivos'],
+    properties: {
+      _id: { bsonType: 'string' },
+      tipo: { enum: ['meditacao', 'leitura', 'movimento', 'descanso', 'estudo', 'criatividade', 'conexao', 'natureza'] },
+      titulo: texto(3, 80),
+      como: texto(10, 400),
+      minutos: inteiro(1, 120),
+      objetivos: { bsonType: 'array', items: { enum: [...OBJETIVO_IDS, 'passar_tempo'] } },
+      ordem: inteiro(1, 999),
+    },
+  },
+
+  // Dados que o app guarda por conta (biblioteca, progresso e tempo de uso),
+  // como cópia de segurança: a pessoa encontra tudo ao entrar em outro
+  // aparelho. Cada campo é o JSON que o app gera.
+  dadosapp: {
+    bsonType: 'object',
+    required: ['_id', 'atualizadoEm'],
+    properties: {
+      _id: { bsonType: 'objectId' },
+      biblioteca: texto(2, 200000),
+      progresso: texto(2, 200000),
+      tempo: texto(2, 200000),
+      atualizadoEm: { bsonType: 'date' },
+    },
+  },
+
   comunidades: {
     bsonType: 'object',
     required: [

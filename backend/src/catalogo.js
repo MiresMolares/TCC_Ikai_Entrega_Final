@@ -22,7 +22,10 @@ export const CATEGORIAS = new Set(Object.values(OBJETIVOS).flat());
 
 // Comunidades fixas do app (lib/data/comunidades_dados.dart). Elas moram no
 // app; o servidor só precisa saber que existem para aceitar mensagens.
-export const COMUNIDADES_FIXAS = new Set(['historia', 'leitores', 'ciencia', 'ideias']);
+export const COMUNIDADES_FIXAS = new Set([
+  'historia', 'leitores', 'ciencia', 'ideias', 'fantasia', 'misterio', 'jogos',
+  'movimento', 'idiomas', 'exatas', 'arte', 'planeta', 'crescer', 'atualidades',
+]);
 
 // lib/pages_home/icones_comunidade.dart
 export const ICONES = new Set([

@@ -2,10 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../pages_configurar/confirmar_entrada.dart';
+import '../services/auth_service.dart';
+import '../services/sessao_usuario.dart';
 import '../widgets/estilo.dart';
 import 'login.dart';
 
-/// Tela de abertura com a logo. Segue para o login sozinha.
+/// Tela de abertura com a logo. Se a pessoa marcou "Lembrar de mim", entra
+/// sozinha (ainda passando pela pergunta "quer entrar agora?"); senão, segue
+/// para o login.
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
@@ -14,25 +19,25 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-  Timer? _timer;
-
   @override
   void initState() {
     super.initState();
-    _timer = Timer(const Duration(seconds: 3), _seguir);
+    _seguir();
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  void _seguir() {
+  Future<void> _seguir() async {
+    // A logo aparece por pelo menos 2 s enquanto o login guardado é conferido.
+    final espera = Future<void>.delayed(const Duration(seconds: 2));
+    final entrou = await AuthService.instance.restaurarSessao();
+    if (entrou) await SessaoUsuario.aoEntrar();
+    await espera;
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),
+      MaterialPageRoute(
+        builder: (context) =>
+            entrou ? const ConfirmarEntradaPage() : const LoginPage(),
+      ),
     );
   }
 

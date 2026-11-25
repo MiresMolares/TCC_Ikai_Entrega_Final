@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/senha.dart';
 import 'api_client.dart';
@@ -149,7 +152,65 @@ class AuthService extends ChangeNotifier {
     return null;
   }
 
+  // ---------- "Lembrar de mim" ----------
+
+  static const String _kToken = 'sessao_token_v1';
+
+  /// Com "Lembrar de mim", guarda o token de login neste aparelho (no
+  /// navegador, no armazenamento do site): ao abrir de novo, a pessoa já
+  /// entra. Sem a opção, apaga o que estiver guardado.
+  Future<void> lembrarSessao(bool lembrar) async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      final token = _api.token;
+      if (lembrar && _api.ativo && token != null) {
+        await p.setString(_kToken, token);
+      } else {
+        await p.remove(_kToken);
+      }
+    } catch (_) {}
+  }
+
+  /// Ao abrir o app: se houver login guardado e ele ainda valer, entra
+  /// sozinho. Devolve true se entrou.
+  Future<bool> restaurarSessao() async {
+    if (!_api.ativo || logado) return logado;
+    SharedPreferences p;
+    String? token;
+    try {
+      p = await SharedPreferences.getInstance();
+      token = p.getString(_kToken);
+    } catch (_) {
+      return false;
+    }
+    if (token == null || token.isEmpty) return false;
+    _api.token = token;
+    try {
+      final d = await _api.pedir('GET', '/auth/eu');
+      final u = d is Map ? d['usuario'] : null;
+      if (u is! Map) throw const ErroApi(0, 'Resposta inesperada.');
+      final foto = u['foto'];
+      _atual = UsuarioApp(
+        nome: (u['nome'] ?? '').toString(),
+        email: (u['email'] ?? '').toString(),
+        foto: foto is String && foto.isNotEmpty ? foto : null,
+      );
+      notifyListeners();
+      return true;
+    } on ErroApi catch (e) {
+      _api.token = null;
+      // Login vencido ou conta apagada: esquece. Sem rede: tenta outro dia.
+      if (e.status == 401 || e.status == 404) {
+        try {
+          await p.remove(_kToken);
+        } catch (_) {}
+      }
+      return false;
+    }
+  }
+
   void sair() {
+    unawaited(lembrarSessao(false));
     _atual = null;
     _servidorApagou = false;
     _api.limparSessao();

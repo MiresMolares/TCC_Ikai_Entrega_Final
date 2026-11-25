@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/artigo.dart';
+import '../core/tempo_relativo.dart';
 import '../data/comentario.dart';
 import '../services/conteudo_usuario.dart';
 import '../services/foto_perfil_service.dart';
@@ -117,12 +118,8 @@ class _ComentariosArtigoState extends State<ComentariosArtigo> {
     }
   }
 
-  static String _quando(int ms) {
-    final d = DateTime.fromMillisecondsSinceEpoch(ms);
-    String dois(int n) => n.toString().padLeft(2, '0');
-    return '${dois(d.day)}/${dois(d.month)}/${d.year} às '
-        '${dois(d.hour)}:${dois(d.minute)}';
-  }
+  static String _quando(int ms) =>
+      haQuanto(DateTime.fromMillisecondsSinceEpoch(ms));
 
   Widget _avatar(Comentario c, double raio) {
     if (_s.euComentei(c)) {

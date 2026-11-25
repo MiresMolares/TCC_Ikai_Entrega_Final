@@ -38,6 +38,15 @@ void main() {
       }
     });
 
+    test('toda categoria tem pelo menos 6 artigos no acervo', () {
+      for (final o in todosOsObjetivos) {
+        for (final cat in o.categorias) {
+          final n = artigosDados.where((x) => x.categoriaId == cat.id).length;
+          expect(n, greaterThanOrEqualTo(6), reason: cat.id);
+        }
+      }
+    });
+
     test('campos obrigatórios preenchidos e sem emojis', () {
       for (final a in artigosDados) {
         expect(a.titulo.trim().isNotEmpty, isTrue, reason: a.id);

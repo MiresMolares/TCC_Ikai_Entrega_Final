@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/tempo_relativo.dart';
 import '../../services/artigos_repositorio.dart';
 import '../../services/config_service.dart';
 import '../../services/notificacoes_service.dart';
@@ -37,15 +38,7 @@ class _NotificacaoPageState extends State<NotificacaoPage> {
     abrirArtigo(context, artigo);
   }
 
-  static String _quando(DateTime d) {
-    final agora = DateTime.now();
-    final dif = agora.difference(d);
-    if (dif.inMinutes < 1) return 'agora';
-    if (dif.inMinutes < 60) return 'há ${dif.inMinutes} min';
-    if (dif.inHours < 24) return 'há ${dif.inHours} h';
-    String dois(int n) => n.toString().padLeft(2, '0');
-    return '${dois(d.day)}/${dois(d.month)}/${d.year}';
-  }
+  static String _quando(DateTime d) => haQuanto(d);
 
   static IconData _icone(String tipo) => switch (tipo) {
     'resposta' => Icons.reply_rounded,
@@ -170,7 +163,7 @@ class _NotificacaoPageState extends State<NotificacaoPage> {
                 ? const SizedBox.shrink()
                 : TextButton(
                     onPressed: _n.lerTodas,
-                    child: const Text('Marcar todas como lidas'),
+                    child: const Text('Ler todas'),
                   ),
           ),
         ],

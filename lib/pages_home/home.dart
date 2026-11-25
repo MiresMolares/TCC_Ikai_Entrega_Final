@@ -6,7 +6,10 @@ import '../pages_configurar/fluxo_objetivos_page.dart';
 import '../services/artigos_repositorio.dart';
 import '../services/auth_service.dart';
 import '../services/config_service.dart';
+import '../services/foto_perfil_service.dart';
 import '../services/notificacoes_service.dart';
+import '../widgets/avatar_pessoa.dart';
+import '../widgets/botao_criar.dart';
 import '../services/tempo_diario.dart';
 import '../core/uso_diario.dart';
 import '../widgets/artigo_card.dart';
@@ -50,6 +53,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Cores.fundo,
+      // "Criar" (artigo ou comunidade) no canto, no Início e na Comunidade.
+      floatingActionButton: (_indice == 0 || _indice == 2)
+          ? const BotaoCriar()
+          : null,
       body: SafeArea(
         child: IndexedStack(
           index: _indice,
@@ -372,26 +379,22 @@ class _Cabecalho extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final inicial = nome.isEmpty
-        ? 'I'
-        : String.fromCharCode(nome.runes.first).toUpperCase();
     return Row(
       children: [
-        Container(
-          width: 52,
-          height: 52,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Cores.bege,
-            border: Border.all(color: Cores.bege, width: 3),
-          ),
-          child: Text(
-            inicial,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Cores.tituloVerde,
+        // A mesma foto do Perfil (muda aqui assim que é trocada lá).
+        ListenableBuilder(
+          listenable: FotoPerfilService.instance,
+          builder: (context, _) => Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Cores.bege,
+            ),
+            child: AvatarPessoa(
+              nome: nome,
+              bytes: FotoPerfilService.instance.bytes,
+              url: FotoPerfilService.instance.url,
+              raio: 24,
             ),
           ),
         ),

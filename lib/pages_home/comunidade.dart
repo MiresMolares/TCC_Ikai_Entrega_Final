@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../core/uso_diario.dart';
+import '../core/tempo_relativo.dart';
 import '../data/artigo.dart';
 import '../data/comunidade.dart';
 import '../services/artigos_repositorio.dart';
 import '../services/conteudo_usuario.dart';
 import '../widgets/artigo_card.dart';
+import '../widgets/botao_criar.dart';
 import '../widgets/estilo.dart';
 import 'criar_comunidade.dart';
 import 'icones_comunidade.dart';
@@ -68,46 +69,38 @@ class ComunidadePage extends StatelessWidget {
             style: TextStyle(fontSize: 13, color: Cores.subtitulo),
           ),
           const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CriarComunidadePage(),
-                    ),
-                  ),
-                  icon: const Icon(Icons.group_add_outlined, size: 20),
-                  label: const Text('Criar comunidade'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Cores.laranja,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size.fromHeight(46),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MeusArtigosPage(),
-                    ),
-                  ),
-                  icon: const Icon(Icons.edit_note_outlined, size: 20),
-                  label: const Text('Meus artigos'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Cores.laranja,
-                    side: BorderSide(color: Cores.laranja),
-                    minimumSize: const Size.fromHeight(46),
-                  ),
-                ),
-              ),
-            ],
+          OpcaoDeCriacao(
+            icone: Icons.edit_note_rounded,
+            titulo: 'Meus artigos',
+            descricao: 'Escreva um artigo novo ou edite os seus. Eles '
+                'aparecem no feed de quem escolheu a categoria.',
+            aoTocar: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MeusArtigosPage()),
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
+          OpcaoDeCriacao(
+            icone: Icons.group_add_outlined,
+            titulo: 'Criar uma comunidade',
+            descricao: 'Um grupo pequeno para conversar sobre um assunto.',
+            aoTocar: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CriarComunidadePage(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Participe',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Cores.titulo,
+            ),
+          ),
+          const SizedBox(height: 10),
           for (final c in servico.comunidades)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -431,7 +424,7 @@ class _PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final quando = chaveDoDia(
+    final quando = haQuanto(
       DateTime.fromMillisecondsSinceEpoch(post.criadoMs),
     );
     return Container(

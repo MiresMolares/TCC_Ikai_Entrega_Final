@@ -23,6 +23,19 @@ export function rotasCatalogo({ db, config }) {
     })));
   });
 
+  // Sugestões para o fim do tempo. ?objetivos=ler,estudar traz as que
+  // combinam com esses objetivos e as que servem para todos.
+  r.get('/sugestoes', login, async (req, res) => {
+    const pedidos = String(req.query.objetivos ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+    const filtro = pedidos.length
+      ? { $or: [{ objetivos: { $size: 0 } }, { objetivos: { $in: pedidos } }] }
+      : {};
+    const lista = await db.sugestoes.find(filtro).sort({ ordem: 1 }).toArray();
+    res.json(lista.map((s) => ({
+      id: s._id, tipo: s.tipo, titulo: s.titulo, como: s.como, minutos: s.minutos, objetivos: s.objetivos,
+    })));
+  });
+
   r.get('/objetivos/:id/categorias', login, async (req, res) => {
     const o = await db.objetivos.findOne({ _id: req.params.id });
     if (!o) throw naoEncontrado('Objetivo não encontrado.');

@@ -171,7 +171,28 @@ class TempoDiarioService extends ChangeNotifier {
   static const int metaMinima = 10;
   static const int metaMaxima = 240;
   static const int metaPadrao = 45;
-  static const List<int> opcoesDeMeta = [15, 30, 45, 60, 90, 120];
+
+  /// Meta curta para demonstrar o fim do tempo numa apresentação.
+  static const int metaApresentacao = 2;
+  static const List<int> opcoesDeMeta = [
+    metaApresentacao,
+    15,
+    30,
+    45,
+    60,
+    90,
+    120,
+  ];
+
+  /// A meta é aceita? (2 min de apresentação, ou de 10 min a 4 h.)
+  static bool metaValida(int minutos) =>
+      minutos == metaApresentacao ||
+      (minutos >= metaMinima && minutos <= metaMaxima);
+
+  /// Texto da opção ("2 min (apresentação)", "1h30"...).
+  static String nomeDaMeta(int minutos) => minutos == metaApresentacao
+      ? '$minutos min (apresentação)'
+      : formatarHm(minutos * 60);
 
   static const int maxProrrogacoes = 2;
   static const List<int> opcoesProrrogacao = [10, 15, 30];
@@ -271,12 +292,13 @@ class TempoDiarioService extends ChangeNotifier {
   /// aumentar vale a partir de amanhã (para não esticar o limite no calor
   /// do momento).
   ResultadoMeta definirMeta(int minutos, {bool? avancado}) {
-    if (minutos < metaMinima || minutos > metaMaxima) {
-      return ResultadoMeta.invalida;
-    }
+    if (!metaValida(minutos)) return ResultadoMeta.invalida;
     if (avancado != null) _avancado = avancado;
     ResultadoMeta r;
-    if (_metaMin == null || minutos <= _metaMin!) {
+    // Sair da meta de apresentação também vale na hora.
+    if (_metaMin == null ||
+        minutos <= _metaMin! ||
+        _metaMin == metaApresentacao) {
       _metaMin = minutos;
       _metaAmanhaMin = null;
       r = ResultadoMeta.aplicadaAgora;
@@ -435,6 +457,21 @@ class TempoDiarioService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// A pessoa escolheu uma sugestão para fazer longe da tela.
+  void registrarSugestaoEscolhida(String titulo) {
+    final t = _limpar(titulo);
+    if (t.isEmpty) return;
+    _adicionarReflexao('sugestao', t);
+    unawaited(_gravar());
+    notifyListeners();
+  }
+
+  /// O resumo de hoje já foi escrito?
+  bool get resumoDeHojeEscrito {
+    final hoje = chaveDoDia(agora());
+    return _reflexoes.any((r) => r.dia == hoje && r.tipo == 'aprendi');
+  }
+
   /// O que a pessoa contou que aprendeu. Devolve false se vazio.
   bool registrarAprendizado(String texto) {
     final t = _limpar(texto);
@@ -530,11 +567,9 @@ class TempoDiarioService extends ChangeNotifier {
         final d = jsonDecode(bruto);
         if (d is Map) {
           final meta = d['meta'];
-          if (meta is int && meta >= metaMinima && meta <= metaMaxima) {
-            _metaMin = meta;
-          }
+          if (meta is int && metaValida(meta)) _metaMin = meta;
           final amanha = d['amanha'];
-          if (amanha is int && amanha >= metaMinima && amanha <= metaMaxima) {
+          if (amanha is int && metaValida(amanha)) {
             _metaAmanhaMin = amanha;
           }
           _avancado = d['adv'] == true;

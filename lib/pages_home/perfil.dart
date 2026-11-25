@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../pages_login/login.dart';
 import '../services/auth_service.dart';
+import '../services/config_service.dart';
 import '../services/sessao_usuario.dart';
 import '../widgets/estilo.dart';
 import '../widgets/foto_perfil_editavel.dart';
@@ -104,6 +105,59 @@ class PerfilPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
+            // Modo escuro à mão, sem precisar entrar em Configurações.
+            ListenableBuilder(
+              listenable: ConfigService.instance,
+              builder: (context, _) {
+                final cfg = ConfigService.instance;
+                return Material(
+                  color: Cores.cartao,
+                  borderRadius: BorderRadius.circular(18),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: Cores.bordaQuente),
+                    ),
+                    child: SwitchListTile(
+                      value: cfg.escuro,
+                      onChanged: cfg.definirEscuro,
+                      activeTrackColor: Cores.verde,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      secondary: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Cores.rosado,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Icon(
+                          cfg.escuro
+                              ? Icons.dark_mode_outlined
+                              : Icons.light_mode_outlined,
+                          color: Cores.laranja,
+                          size: 23,
+                        ),
+                      ),
+                      title: Text(
+                        'Modo escuro',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Cores.titulo,
+                        ),
+                      ),
+                      subtitle: Text(
+                        cfg.escuro ? 'Ligado' : 'Desligado',
+                        style: TextStyle(fontSize: 12, color: Cores.subtitulo),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
             _CartaoNavegacao(
               icone: Icons.badge_outlined,
               titulo: 'Meu perfil',

@@ -67,12 +67,12 @@ after(async () => {
 });
 
 describe('estrutura do banco', () => {
-  test('as 10 coleções existem, cada uma com validador de esquema', async () => {
+  test('as 12 coleções existem, cada uma com validador de esquema', async () => {
     const lista = await db.base.listCollections().toArray();
     const nomes = lista.map((c) => c.name).sort();
     assert.deepEqual(nomes, [
-      'artigos', 'categorias', 'comentarios', 'comunidades', 'notificacoes',
-      'objetivos', 'posts', 'preferencias', 'sessoes', 'usuarios',
+      'artigos', 'categorias', 'comentarios', 'comunidades', 'dadosapp', 'notificacoes',
+      'objetivos', 'posts', 'preferencias', 'sessoes', 'sugestoes', 'usuarios',
     ]);
     for (const c of lista) {
       assert.ok(c.options?.validator?.$jsonSchema, `${c.name} sem validador`);

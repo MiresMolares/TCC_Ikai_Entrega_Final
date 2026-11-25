@@ -409,6 +409,41 @@ describe('respostas e notificações', () => {
   });
 });
 
+describe('sugestões e dados do aparelho', () => {
+  test('sugestões do fim do tempo: todas, ou filtradas por objetivo', async () => {
+    const t = await novaConta('Gui Lima', 'gui.lima@teste.com');
+    assert.equal((await chamar('GET', '/sugestoes')).status, 401);
+    const todas = (await chamar('GET', '/sugestoes', undefined, t)).json;
+    assert.ok(todas.length >= 20);
+    assert.ok(todas.every((x) => x.titulo && x.como && x.minutos > 0));
+    assert.ok(todas.some((x) => x.tipo === 'meditacao'));
+    const ler = (await chamar('GET', '/sugestoes?objetivos=ler', undefined, t)).json;
+    assert.ok(ler.length < todas.length);
+    assert.ok(ler.every((x) => x.objetivos.length === 0 || x.objetivos.includes('ler')));
+  });
+
+  test('cópia da biblioteca, progresso e tempo: guarda, devolve e valida', async () => {
+    const t = await novaConta('Hel Lima', 'hel.lima@teste.com');
+    const vazio = (await chamar('GET', '/meus-dados-app', undefined, t)).json;
+    assert.equal(vazio.biblioteca, null);
+    const biblioteca = JSON.stringify({ pastas: [{ id: 'p1', nome: 'Salvos', artigos: ['a001'] }] });
+    const tempo = JSON.stringify({ meta: 30, uso: { '2026-11-20': 600 } });
+    assert.equal((await chamar('PUT', '/meus-dados-app', { biblioteca, tempo }, t)).status, 200);
+    const d = (await chamar('GET', '/meus-dados-app', undefined, t)).json;
+    assert.equal(d.biblioteca, biblioteca);
+    assert.equal(d.tempo, tempo);
+    assert.equal(d.progresso, null);
+    assert.equal((await chamar('PUT', '/meus-dados-app', { tempo: 'não é json' }, t)).status, 400);
+    assert.equal((await chamar('PUT', '/meus-dados-app', {}, t)).status, 400);
+    // Cada conta vê só a sua cópia.
+    const outra = await novaConta('Ivo Lima', 'ivo.lima@teste.com');
+    assert.equal((await chamar('GET', '/meus-dados-app', undefined, outra)).json.biblioteca, null);
+    // Excluir a conta apaga a cópia.
+    await chamar('DELETE', '/meus-dados', undefined, t);
+    assert.equal(await db.dadosapp.countDocuments({}), 0);
+  });
+});
+
 describe('foto de perfil', () => {
   // PNG de 1x1 pixel.
   const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';

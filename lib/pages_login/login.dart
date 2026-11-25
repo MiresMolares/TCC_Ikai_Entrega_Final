@@ -40,7 +40,8 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  /// "Lembrar de mim" guarda só o e-mail, nunca a senha.
+  /// "Lembrar de mim" guarda o e-mail e o login deste aparelho (o token, que
+  /// vence em 7 dias), nunca a senha.
   Future<void> _carregarEmailLembrado() async {
     try {
       final p = await SharedPreferences.getInstance();
@@ -81,6 +82,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     await _guardarEmailLembrado();
+    await AuthService.instance.lembrarSessao(_lembrar);
     await SessaoUsuario.aoEntrar();
     if (!mounted) return;
     Navigator.pushReplacement(

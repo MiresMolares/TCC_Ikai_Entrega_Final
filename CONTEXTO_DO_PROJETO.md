@@ -1,7 +1,7 @@
 # Contexto do projeto Ikai (para continuar em uma conversa nova)
 
 > Leia este arquivo inteiro antes de mexer no projeto. Ele resume o que já foi
-> feito, como rodar e as decisões tomadas. Atualizado em 24/11/2026.
+> feito, como rodar e as decisões tomadas. Atualizado em 25/11/2026.
 
 ## 1. Onde está cada coisa
 
@@ -56,11 +56,11 @@ Abrir **http://localhost:5300**. Login de demonstração: **adm@email.com / 1234
 
 ## 3. Testes (como estavam no fim)
 
-- App: `flutter test` → **188 passando** (caiu porque os testes da Ik AI
-  saíram); `flutter analyze` → 0 erros (44 "info").
+- App: `flutter test` → **199 passando**; `flutter analyze` → 0 erros
+  (46 "info").
 - Servidor: na pasta `backend`,
   `node --env-file=.env --test --test-concurrency=1 test/api.test.js test/banco.test.js`
-  → **63 passando** (cria bancos temporários `ikai_teste_*` e apaga no fim).
+  → **65 passando** (cria bancos temporários `ikai_teste_*` e apaga no fim).
 
 ## 4. O que já foi feito (resumo)
 
@@ -136,17 +136,26 @@ Caio (objetivo "Passar o tempo" → Explorar → buscar pelo título).
 ## 7. Pendências e cuidados
 
 - A rodada de 24/11 já está no GitHub (commit `3582da2`, branch `main`).
-- **Hospedagem (preparada, falta publicar):** só site, sem APK. Um serviço no
-  Render entrega a API e o site juntos (`render.yaml`; o site compilado fica
-  em `backend/public`, gerado por `.\gerar-site.ps1` com `API_URL=origem`).
-  Passo a passo para criar a conta e publicar em `HOSPEDAGEM.md`. Sempre que
-  mudar `lib\`, rodar `.\gerar-site.ps1` antes de enviar ao GitHub.
-- Não existe: login persistente (recarregar pede login), atualização em tempo
-  real, edição de comunidade, recuperação de senha real, login com Google.
+- **Hospedagem (no ar desde 25/11):** só site, sem APK. Um serviço no Render
+  entrega a API e o site juntos (`render.yaml`, publica sozinho a cada envio
+  ao GitHub; o site compilado fica em `backend/public`, gerado por
+  `.\gerar-site.ps1` com `API_URL=origem`). Sempre que mudar `lib\`, rodar
+  `.\gerar-site.ps1` antes de enviar ao GitHub. Detalhes em `HOSPEDAGEM.md`.
+- **Rodada de 25/11 (para a banca):** conta de apresentação
+  `apresentacao@ikai.app` com uso salvo (`npm run db:apresentacao` repõe;
+  senha em `HOSPEDAGEM.md`); cópia de biblioteca/progresso/tempo no servidor
+  (`/meus-dados-app`, `lib/services/sincronizacao_service.dart`); "Lembrar
+  de mim" guarda o token 7 dias (`AuthService.restaurarSessao`, chamado na
+  splash); meta de 2 min (apresentação); fim do tempo com resumo e banco de
+  sugestões (coleção `sugestoes`, `backend/src/sugestoes.js`); botão "Criar"
+  (`lib/widgets/botao_criar.dart`); tempo relativo nos comentários; foto no
+  Início; modo escuro no Perfil; 180 artigos (6 por categoria) e 14
+  comunidades fixas (ids também em `backend/src/catalogo.js`).
+- Não existe: atualização em tempo real, edição de comunidade, recuperação de
+  senha real, login com Google.
 - `docs/api/openapi.yaml` (da equipe) ainda descreve login com
   Google/Facebook e não tem as rotas novas.
 - `AGENTS.md` está desatualizado (é da linha antiga da equipe).
-- Guias `.md`/`.txt` novos ainda não foram enviados ao GitHub.
 - Para atualizar o GitHub: `git add -A; git commit -m "..."; git push`
   (o login do Git já está salvo no Windows).
 - Preferências do usuário: respostas em português, passo a passo calmo e

@@ -91,7 +91,12 @@ class _MetaDiariaPageState extends State<MetaDiariaPage> {
                             ),
                           ),
                           Slider(
-                            value: _minutos.toDouble(),
+                            value: _minutos
+                                .clamp(
+                                  TempoDiarioService.metaMinima,
+                                  TempoDiarioService.metaMaxima,
+                                )
+                                .toDouble(),
                             min: TempoDiarioService.metaMinima.toDouble(),
                             max: TempoDiarioService.metaMaxima.toDouble(),
                             divisions:
@@ -112,7 +117,7 @@ class _MetaDiariaPageState extends State<MetaDiariaPage> {
                       children: [
                         for (final m in TempoDiarioService.opcoesDeMeta)
                           ChoiceChip(
-                            label: Text(formatarHm(m * 60)),
+                            label: Text(TempoDiarioService.nomeDaMeta(m)),
                             selected: _minutos == m,
                             selectedColor: Cores.selecao,
                             onSelected: (_) => setState(() => _minutos = m),

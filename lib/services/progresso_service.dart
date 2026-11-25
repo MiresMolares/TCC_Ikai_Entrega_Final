@@ -99,6 +99,17 @@ class ProgressoService extends ChangeNotifier {
 
   bool foiLido(String artigoId) => _lidos.containsKey(artigoId);
   int get totalLidos => _lidos.length;
+
+  /// Ids dos artigos concluídos no dia de [dia] (do mais antigo ao mais novo).
+  List<String> lidosNoDia(DateTime dia) {
+    bool mesmoDia(DateTime d) =>
+        d.year == dia.year && d.month == dia.month && d.day == dia.day;
+    final doDia = _lidos.entries
+        .where((e) => mesmoDia(DateTime.fromMillisecondsSinceEpoch(e.value)))
+        .toList()
+      ..sort((x, y) => x.value.compareTo(y.value));
+    return [for (final e in doDia) e.key];
+  }
   int get sessoesConcluidas => _sessoes;
   int get segundosEmSessao => _segundos;
   int get ofensiva => calcularOfensiva(_dias, agora());

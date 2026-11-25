@@ -86,6 +86,44 @@ export function rotasAuth({ db, config }) {
     });
   });
 
+  // Cópia dos dados do aparelho (biblioteca, progresso, tempo de uso).
+  // Cada campo é o JSON que o app gera; o servidor só confere o tamanho.
+  const BLOCOS = ['biblioteca', 'progresso', 'tempo'];
+  r.get('/meus-dados-app', login, async (req, res) => {
+    const d = await db.dadosapp.findOne({ _id: req.usuario._id });
+    res.json({
+      biblioteca: d?.biblioteca ?? null,
+      progresso: d?.progresso ?? null,
+      tempo: d?.tempo ?? null,
+      atualizadoEm: d?.atualizadoEm ?? null,
+    });
+  });
+
+  r.put('/meus-dados-app', login, async (req, res) => {
+    const mudar = {};
+    for (const b of BLOCOS) {
+      const v = req.body?.[b];
+      if (v === undefined || v === null) continue;
+      if (typeof v !== 'string' || v.length < 2 || v.length > 200000) {
+        throw ruim(`Campo inválido: ${b}.`);
+      }
+      try {
+        JSON.parse(v);
+      } catch {
+        throw ruim(`Campo inválido: ${b}.`);
+      }
+      mudar[b] = v;
+    }
+    if (!Object.keys(mudar).length) throw ruim('Envie pelo menos um dos dados.');
+    const atualizadoEm = new Date();
+    await db.dadosapp.updateOne(
+      { _id: req.usuario._id },
+      { $set: { ...mudar, atualizadoEm } },
+      { upsert: true },
+    );
+    res.json({ atualizadoEm });
+  });
+
   // O e-mail identifica a conta e não muda por aqui (igual ao app).
   r.patch('/auth/eu', login, async (req, res) => {
     const nome = limpo(req.body?.nome);
@@ -126,6 +164,7 @@ export function rotasAuth({ db, config }) {
     await db.artigos.deleteMany({ autorId: id });
     await db.sessoes.deleteMany({ usuarioId: id });
     await db.notificacoes.deleteMany({ usuarioId: id });
+    await db.dadosapp.deleteOne({ _id: id });
     await db.preferencias.deleteOne({ _id: id });
     await db.usuarios.deleteOne({ _id: id });
     res.status(204).end();

@@ -53,11 +53,42 @@ cd C:\Ikai\TCC-Entrega-final; .\gerar-site.ps1
 Depois: commit e envio ao GitHub. Mudanças só no servidor (`backend\src`) não
 precisam do `gerar-site.ps1`.
 
+## Conta de apresentação (para a banca)
+Já existe no banco uma conta com uso salvo: duas semanas de tempo de uso,
+resumos do dia, artigos lidos e salvos em pastas, um artigo escrito por ela,
+comentários, respostas, notificações e mensagens em comunidades.
+
+- E-mail: `apresentacao@ikai.app`
+- Senha: `Banca@Ikai2026`
+
+Para deixar a conta como nova antes da apresentação (as datas são contadas a
+partir do dia em que o comando roda), feche o site em todos os aparelhos e rode:
+
+```powershell
+cd C:\Ikai\TCC-Entrega-final\backend; npm run db:apresentacao
+```
+
+### Roteiro sugerido da demonstração
+1. Entre com a conta de apresentação, marcando **Lembrar de mim**.
+2. Mostre o sino (2 notificações), a Biblioteca (3 pastas), o Progresso e a
+   aba Comunidade (14 comunidades; o botão **Criar** fica no canto).
+3. Em **Perfil > Configurações > Meta diária**, escolha **2 min
+   (apresentação)**. Diminuir vale na hora; em até 2 minutos aparece a tela de
+   fim do tempo, com o **resumo do dia** e as **sugestões** do banco
+   (meditação, leitura, movimento...).
+4. Depois, volte a meta para 30 min (sair da meta de apresentação também vale
+   na hora).
+
 ## Bom saber
 - **O plano gratuito "dorme"** depois de 15 minutos sem uso. A primeira
   abertura depois disso demora cerca de 1 minuto. No dia da banca, abra o
   link uns minutos antes.
-- **Fechar a página pede login de novo** (o app não guarda o login).
+- **Lembrar de mim**: marcado no login, o navegador guarda o login por 7
+  dias e o site abre já conectado (ainda perguntando "quer entrar agora?").
+  Sair da conta apaga o login guardado.
+- **Os dados da conta ficam no servidor**: biblioteca, progresso e tempo de
+  uso são copiados para o banco a cada 30 segundos de uso e ao sair, e voltam
+  ao entrar em qualquer aparelho.
 - **"Adicionar à tela inicial"** no navegador do celular cria um ícone do
   Ikai, que abre em tela cheia, como um app.
 - O site precisa de internet para baixar o motor gráfico e as fontes do

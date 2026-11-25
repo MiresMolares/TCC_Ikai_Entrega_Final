@@ -390,7 +390,13 @@ export function rotasConteudo({ db, config }) {
     }
 
     const nomeChave = normalizar(nome);
-    const nomesFixos = ['historia em pauta', 'clube de leitores', 'curiosos da ciencia', 'filosofia e sociedade'];
+    // Nomes das comunidades fixas do app (lib/data/comunidades_dados.dart).
+    const nomesFixos = [
+      'historia em pauta', 'clube de leitores', 'curiosos da ciencia', 'filosofia e sociedade',
+      'mundos imaginados', 'clube do misterio', 'tabuleiro e controle', 'corpo em movimento',
+      'palavras e idiomas', 'numeros sem medo', 'atelie aberto', 'vida e planeta',
+      'crescer aos poucos', 'noticias com calma',
+    ];
     if (nomesFixos.includes(nomeChave)) throw conflito('Já existe uma comunidade com esse nome.');
 
     await limitarFrequencia(

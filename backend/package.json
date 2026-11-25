@@ -13,7 +13,8 @@
     "test": "node --test --test-concurrency=1 \"test/*.test.js\"",
     "db:init": "node scripts/init-db.js",
     "db:demo": "node scripts/seed-demo.js",
-    "db:adm": "node --env-file=.env scripts/criar-adm.js"
+    "db:adm": "node --env-file=.env scripts/criar-adm.js",
+    "db:apresentacao": "node --env-file=.env scripts/criar-conta-apresentacao.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

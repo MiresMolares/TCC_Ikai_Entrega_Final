@@ -14,8 +14,8 @@
       "urlHashed": true
     },
     {
-      "url": "assets/FontManifest.6b5a4ca7.json",
-      "hash": "6b5a4ca7",
+      "url": "assets/FontManifest.2606cf2b.json",
+      "hash": "2606cf2b",
       "size": 226,
       "urlHashed": true
     },
@@ -44,9 +44,9 @@
       "urlHashed": true
     },
     {
-      "url": "assets/fonts/MaterialIcons-Regular.b5b88afb.otf",
-      "hash": "b5b88afb",
-      "size": 17380,
+      "url": "assets/fonts/MaterialIcons-Regular.0bc0cb1d.otf",
+      "hash": "0bc0cb1d",
+      "size": 18428,
       "urlHashed": true
     },
     {
@@ -81,8 +81,8 @@
     },
     {
       "url": "flutter_bootstrap.js",
-      "hash": "7e26b400",
-      "size": 14581,
+      "hash": "9a62e840",
+      "size": 14582,
       "urlHashed": false
     },
     {
@@ -116,9 +116,9 @@
       "urlHashed": false
     },
     {
-      "url": "main.dart.cb1f68a4.js",
-      "hash": "cb1f68a4",
-      "size": 3446854,
+      "url": "main.dart.2f9acf18.js",
+      "hash": "2f9acf18",
+      "size": 3567333,
       "urlHashed": true
     },
     {

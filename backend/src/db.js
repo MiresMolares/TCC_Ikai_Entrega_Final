@@ -4,6 +4,7 @@ import {
   CATEGORIAS_INFO, OBJETIVOS, OBJETIVOS_INFO, OBJETIVO_DA_CATEGORIA,
 } from './catalogo.js';
 import { criarColecoes } from './esquemas.js';
+import { SUGESTOES } from './sugestoes.js';
 
 const NOVENTA_DIAS = 90 * 24 * 3600;
 
@@ -26,6 +27,13 @@ export async function sincronizarCatalogo(db) {
     })));
   await db.objetivos.bulkWrite(objetivos);
   await db.categorias.bulkWrite(categorias);
+  // Banco de sugestões do fim do tempo (src/sugestoes.js).
+  if (db.sugestoes) {
+    await db.sugestoes.bulkWrite(SUGESTOES.map((s, i) => ({
+      replaceOne: { filter: { _id: s._id }, replacement: { ...s, ordem: i + 1 }, upsert: true },
+    })));
+    await db.sugestoes.deleteMany({ _id: { $nin: SUGESTOES.map((s) => s._id) } });
+  }
 }
 
 /** Cria os índices. O nome de cada um aparece na documentação do banco. */
@@ -106,6 +114,8 @@ export async function conectar(config) {
     comunidades: base.collection('comunidades'),
     posts: base.collection('posts'),
     comentarios: base.collection('comentarios'),
+    sugestoes: base.collection('sugestoes'),
+    dadosapp: base.collection('dadosapp'),
   };
   await criarIndices(db);
   await sincronizarCatalogo(db);

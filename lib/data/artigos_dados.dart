@@ -1,4 +1,9 @@
 import 'artigo.dart';
+import 'artigos_estudar.dart';
+import 'artigos_estudar2.dart';
+import 'artigos_ler.dart';
+import 'artigos_ler2.dart';
+import 'artigos_ver.dart';
 
 /// ============================================================
 /// BANCO DE ARTIGOS (TEMPORÁRIO, até existir o banco de dados)
@@ -29,7 +34,19 @@ import 'artigo.dart';
 ///
 /// Todos os textos abaixo foram escritos para o Ikai.
 
+/// Todo o acervo do app: os 66 primeiros artigos (abaixo) e os das listas
+/// por objetivo (artigos_ver.dart, artigos_ler*.dart, artigos_estudar*.dart).
+/// Cada categoria tem pelo menos 6 artigos (o teste confere).
 const List<Artigo> artigosDados = [
+  ...artigosOriginais,
+  ...artigosVer,
+  ...artigosLer,
+  ...artigosLer2,
+  ...artigosEstudar,
+  ...artigosEstudar2,
+];
+
+const List<Artigo> artigosOriginais = [
   // ------------------------------------------------------------
   // VER CONTEÚDO
   // ------------------------------------------------------------

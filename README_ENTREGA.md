@@ -3,7 +3,29 @@
 App Flutter + servidor Node (Express + MongoDB, pasta `backend/`). O histórico
 das versões anteriores (v5, v6) está no git.
 
-## O que mudou na última rodada (24/11/2026)
+## Rodada de 25/11/2026 (site no Render e preparação para a banca)
+1. **Site hospedado** no Render: o servidor entrega o app e a API no mesmo
+   endereço. Passo a passo e roteiro da demonstração em `HOSPEDAGEM.md`.
+2. **Conta de apresentação** com uso salvo (`npm run db:apresentacao`; dados de
+   acesso em `HOSPEDAGEM.md`).
+3. **Dados da conta no servidor**: biblioteca, progresso e tempo de uso são
+   copiados para o banco (rota `/meus-dados-app`) e voltam em qualquer
+   aparelho.
+4. **Lembrar de mim** guarda o login no navegador por 7 dias.
+5. **Meta de 2 min (apresentação)**, para mostrar o fim do tempo ao vivo.
+6. **Fim do tempo**: resumo do que a pessoa consumiu (sempre disponível, com
+   os artigos concluídos no dia) e **banco de sugestões** para depois da tela
+   (24 sugestões na coleção `sugestoes`, de meditação a natureza, escolhidas
+   pelo objetivo do dia; `backend/src/sugestoes.js`).
+7. **Botão "Criar"** no canto do Início e da Comunidade (escrever artigo, criar
+   comunidade, meus artigos) e cartões novos na aba Comunidade.
+8. **Comentários e notificações** mostram "há 5 min", "há 2 h", "há 3 dias".
+9. **Foto de perfil** aparece também no Início; **modo escuro** direto no
+   Perfil.
+10. **Conteúdo**: 180 artigos no acervo (6 por categoria, `lib/data/artigos_*.dart`)
+    e 14 comunidades fixas.
+
+## Rodada de 24/11/2026
 1. **Senha forte.** Criar conta e trocar a senha exigem pelo menos 8 caracteres
    com letra maiúscula, minúscula, número e caractere especial (`12345678` não
    passa mais). A tela de cadastro mostra a lista de requisitos e vai marcando
@@ -61,9 +83,9 @@ Sem `--dart-define-from-file=env.json` o app roda no modo local (sem banco: sem
 notificações nem fotos para os outros).
 
 ## Testes
-- App: `flutter test` (188 testes) e `flutter analyze` (0 erros).
+- App: `flutter test` (199 testes) e `flutter analyze` (0 erros).
 - Servidor: na pasta `backend`, `node --env-file=.env --test --test-concurrency=1 test/api.test.js test/banco.test.js`
-  (63 testes; cria bancos temporários `ikai_teste_*` e apaga no fim).
+  (65 testes; cria bancos temporários `ikai_teste_*` e apaga no fim).
 
 ## Rotas do servidor (todas exigem login, exceto cadastro, login e imagens)
 | Rota | Função |
@@ -78,7 +100,7 @@ notificações nem fotos para os outros).
 | `GET/POST /comunidades`, `GET/POST /comunidades/:id/posts` | comunidades e mural |
 
 ## Ainda não existe
-Login que continua depois de recarregar a página, atualização em tempo real,
+Atualização em tempo real,
 notificação fora do app (push), edição de comunidade, recuperação de senha por
 e-mail, login com Google.
 

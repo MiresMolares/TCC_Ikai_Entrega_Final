@@ -305,7 +305,7 @@ class _CartaoMeta extends StatelessWidget {
             children: [
               for (final m in opcoes)
                 ChoiceChip(
-                  label: Text(formatarHm(m * 60)),
+                  label: Text(TempoDiarioService.nomeDaMeta(m)),
                   selected: t.metaMin == m,
                   onSelected: (_) => _mudar(context, m),
                 ),

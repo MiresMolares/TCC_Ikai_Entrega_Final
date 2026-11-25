@@ -23,7 +23,7 @@ void main() {
   });
 
   Future<void> montar(WidgetTester tester) async {
-    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.physicalSize = const Size(800, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(const MaterialApp(home: TelaFimDoDia()));
@@ -34,7 +34,9 @@ void main() {
     await montar(tester);
     expect(find.text('Seu tempo de hoje acabou'), findsOneWidget);
     expect(find.text('Você usou 20 min de 20 min hoje.'), findsOneWidget);
-    expect(find.text('O que você aprendeu hoje?'), findsOneWidget);
+    expect(find.text('Resumo do que você consumiu hoje'), findsOneWidget);
+    expect(find.text('Para depois da tela'), findsOneWidget);
+    expect(find.text('Vou fazer isso'), findsNWidgets(3));
     expect(find.text('Continuar mais 10 min'), findsOneWidget);
     expect(find.text('Encerrar por hoje'), findsOneWidget);
     // Os dois botões têm o mesmo tipo (nenhum em destaque).
@@ -78,7 +80,7 @@ void main() {
     t.tick(1200);
     await montar(tester);
     await tester.enterText(find.byType(TextField).first, 'li sobre o mar');
-    await tester.tap(find.text('Guardar'));
+    await tester.tap(find.text('Guardar resumo'));
     await tester.pump();
     expect(find.text('Guardado no seu dia.'), findsOneWidget);
     expect(t.reflexoes.single.tipo, 'aprendi');
@@ -86,6 +88,29 @@ void main() {
     await tester.tap(find.text('Encerrar por hoje'));
     await tester.pump();
     expect(t.fase, FaseDoDia.encerrado);
+  });
+
+  testWidgets('escolher uma sugestão fica registrado no dia', (tester) async {
+    t.tick(1200);
+    await montar(tester);
+    await tester.tap(find.text('Vou fazer isso').first);
+    await tester.pump();
+    expect(find.text('Escolhida para hoje'), findsOneWidget);
+    expect(t.reflexoes.single.tipo, 'sugestao');
+    // "Ver outras ideias" troca as sugestões mostradas.
+    await tester.tap(find.text('Ver outras ideias'));
+    await tester.pump();
+    expect(find.text('Vou fazer isso'), findsWidgets);
+  });
+
+  testWidgets('o resumo escrito vale mesmo encerrando direto', (tester) async {
+    t.tick(1200);
+    await montar(tester);
+    await tester.enterText(find.byType(TextField).first, 'li sobre o céu');
+    await tester.tap(find.text('Encerrar por hoje'));
+    await tester.pump();
+    expect(t.fase, FaseDoDia.encerrado);
+    expect(t.reflexoes.single.texto, 'li sobre o céu');
   });
 
   testWidgets('fim voluntário: pode voltar ao app e não oferece continuar', (

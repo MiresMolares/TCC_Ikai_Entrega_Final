@@ -24,11 +24,12 @@ export function criarApp({ db, config }) {
   // 64 KB para tudo, exceto criar ou editar artigo (pode trazer a capa) e
   // trocar a foto de perfil.
   const jsonPequeno = express.json({ limit: '64kb' });
-  const jsonComCapa = express.json({ limit: '600kb' });
+  const jsonComCapa = express.json({ limit: '700kb' });
   const comCapa = (req) =>
     (req.method === 'POST' && req.path === '/artigos') ||
     (req.method === 'PATCH' && /^\/artigos\/[^/]+$/.test(req.path)) ||
-    (req.method === 'PUT' && req.path === '/auth/eu/foto');
+    (req.method === 'PUT' && req.path === '/auth/eu/foto') ||
+    (req.method === 'PUT' && req.path === '/meus-dados-app');
   app.use((req, res, next) => (comCapa(req) ? jsonComCapa : jsonPequeno)(req, res, next));
 
   app.get('/saude', (_req, res) => {
