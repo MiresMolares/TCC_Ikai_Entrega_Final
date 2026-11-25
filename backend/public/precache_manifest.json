@@ -81,8 +81,14 @@
     },
     {
       "url": "flutter_bootstrap.js",
-      "hash": "9a62e840",
+      "hash": "7980ec8c",
       "size": 14582,
+      "urlHashed": false
+    },
+    {
+      "url": "icon-sem-fundo.png",
+      "hash": "2afa4535",
+      "size": 1068139,
       "urlHashed": false
     },
     {
@@ -110,9 +116,15 @@
       "urlHashed": false
     },
     {
+      "url": "ikai-icon-letter.png",
+      "hash": "94f47c3b",
+      "size": 1046555,
+      "urlHashed": false
+    },
+    {
       "url": "index.html",
-      "hash": "efc3a926",
-      "size": 1189,
+      "hash": "2cd24011",
+      "size": 1234,
       "urlHashed": false
     },
     {
